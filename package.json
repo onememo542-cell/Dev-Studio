@@ -114,8 +114,8 @@
     "globals": "^15.15.0",
     "prettier": "^3.7.3",
     "tsx": "^4.22.0",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^7.3.1"
+    "vite": "^7.3.3"
   }
 }
