@@ -1,6 +1,7 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { SoftSkillView } from "@/components/soft-skills/soft-skill-view";
 import { PageHeader, PageContainer, PageSection } from "@/components/layout";
+import { Heart } from "lucide-react";
 import { z } from "zod";
 
 const searchSchema = z.object({
@@ -25,10 +26,7 @@ export const Route = createFileRoute("/soft-skills")({
   head: () => ({
     meta: [
       { title: "Soft Skills Hub — Dev Studio" },
-      {
-        name: "description",
-        content: "Master communication, leadership, and human engineering with our unified hub.",
-      },
+      { name: "description", content: "Master communication, leadership, and human engineering with our unified hub." },
     ],
   }),
   component: SoftSkillsPage,
@@ -41,9 +39,9 @@ function SoftSkillsPage() {
     <PageContainer>
       <PageSection>
         <PageHeader
+          icon={Heart}
           title="Communication & Soft Skills"
           description="Master the art of collaboration, leadership, and emotional intelligence."
-          className="mb-0 sm:mb-2"
         />
       </PageSection>
 

@@ -21,9 +21,9 @@ export const Route = createFileRoute("/connectors")({
 });
 
 const CONNECTORS_TABS = [
-  { id: "companies", label: "Companies", icon: Building2 },
-  { id: "hr", label: "HR Contacts", icon: Briefcase },
-  { id: "clients", label: "Clients", icon: Users },
+  { id: "companies", label: "Companies",   icon: Building2 },
+  { id: "hr",        label: "HR Contacts", icon: Briefcase },
+  { id: "clients",   label: "Clients",     icon: Users },
 ];
 
 function ConnectorsPage() {
@@ -34,7 +34,6 @@ function ConnectorsPage() {
   const { connectors, upsertConnector, deleteConnector } = useForge();
   const [activeConnectorId, setActiveConnectorId] = useState<string | null>(null);
 
-  // Switch active connector when tab changes
   useEffect(() => {
     const tabConnectors = connectors.filter((c) => c.type === tab);
     if (tabConnectors.length > 0 && !tabConnectors.some((c) => c.id === activeConnectorId)) {
@@ -71,9 +70,10 @@ function ConnectorsPage() {
     <PageContainer>
       <PageSection>
         <PageHeader
+          icon={Users}
           title="Connectors"
           description="Manage your professional network, clients, and company contacts."
-          className="mb-6"
+          className="mb-4"
         />
         <TabNav
           tabs={CONNECTORS_TABS.map((t) => ({

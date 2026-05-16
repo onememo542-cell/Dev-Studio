@@ -26,6 +26,7 @@ import {
   Twitter,
   Instagram,
   FileText,
+  LayoutDashboard,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -222,21 +223,21 @@ function Index() {
   return (
     <PageContainer className="overflow-y-auto">
       <PageSection>
-          <PageHeader
-            eyebrow="Welcome back"
-            title="Your development hub"
-            description="Save, organize and reuse everything that powers your next ship — prompts, agents, components, templates, snippets."
-            className="mb-8"
-            actions={
-              <Link
-                to="/tools"
-                search={{ tab: "prompts" }}
-                className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider border border-border rounded px-3 py-2 hover:bg-card transition-colors"
-              >
-                Browse library <ArrowUpRight className="size-3.5" />
-              </Link>
-            }
-          />
+        <PageHeader
+          icon={LayoutDashboard}
+          eyebrow="Welcome back"
+          title="Your development hub"
+          description="Save, organize and reuse everything that powers your next ship — prompts, agents, components, templates, snippets."
+          actions={
+            <Link
+              to="/tools"
+              search={{ tab: "prompts" }}
+              className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider border border-border rounded px-3 py-2 hover:bg-card transition-colors shrink-0"
+            >
+              Browse library <ArrowUpRight className="size-3.5" />
+            </Link>
+          }
+        />
       </PageSection>
 
       <div className="flex-1 p-4 sm:p-8">
@@ -415,7 +416,6 @@ function Index() {
 
               {/* Social & mail preview */}
               <div className="grid sm:grid-cols-2 gap-3">
-                {/* Latest social draft */}
                 {socialDrafts.length > 0 && (() => {
                   const draft = [...socialDrafts].sort((a, b) => b.updatedAt - a.updatedAt)[0];
                   const PlatformIcon = platformIcon(draft.platform);
@@ -441,7 +441,6 @@ function Index() {
                   );
                 })()}
 
-                {/* Latest mail template */}
                 {mailTemplates.length > 0 && (() => {
                   const tpl = [...mailTemplates].sort((a, b) => b.updatedAt - a.updatedAt)[0];
                   return (
@@ -567,16 +566,10 @@ function Index() {
                   ].map((row) => (
                     <li key={row.label} className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">{row.label}</span>
-                      <span className="font-mono font-semibold">{row.value}</span>
+                      <span className="font-mono font-medium">{row.value}</span>
                     </li>
                   ))}
                 </ul>
-                <Link
-                  to="/connectors"
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground mt-3"
-                >
-                  Manage connectors <ArrowUpRight className="size-3" />
-                </Link>
               </div>
             </aside>
           </div>
@@ -589,9 +582,9 @@ function Index() {
 function timeAgo(ts: number) {
   const diff = Date.now() - ts;
   const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
   if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  return `${d}d ago`;
+  return `${Math.floor(h / 24)}d ago`;
 }

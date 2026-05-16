@@ -22,8 +22,8 @@ export const Route = createFileRoute("/mails")({
 
 const MAIL_TABS = [
   { id: "cover-letter", label: "Cover Letters", icon: Send },
-  { id: "gmail", label: "Gmail", icon: Mail },
-  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+  { id: "gmail",        label: "Gmail",         icon: Mail },
+  { id: "whatsapp",     label: "WhatsApp",      icon: MessageCircle },
 ];
 
 function MailsPage() {
@@ -34,7 +34,6 @@ function MailsPage() {
   const { mailTemplates, upsertMailTemplate, deleteMailTemplate } = useForge();
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
 
-  // Switch active mail when channel changes
   useEffect(() => {
     const channelMails = mailTemplates.filter((m) => m.channel === tab);
     if (channelMails.length > 0 && !channelMails.some((m) => m.id === activeTemplateId)) {
@@ -69,9 +68,10 @@ function MailsPage() {
     <PageContainer>
       <PageSection>
         <PageHeader
+          icon={Mail}
           title="Communication Hub"
           description="Manage your professional emails, cover letters, and outreach templates."
-          className="mb-6"
+          className="mb-4"
         />
         <TabNav
           tabs={MAIL_TABS.map((t) => ({

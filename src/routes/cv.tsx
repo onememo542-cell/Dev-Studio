@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { PageContainer, PageSection, PageHeader, SplitLayout } from "@/components/layout";
-import { FileText } from "lucide-react";
+import {
+  PageContainer, PageSection, PageHeader, TabNav, SplitLayout,
+} from "@/components/layout";
+import {
+  FileText, Save, User, Briefcase, GraduationCap, Code2, FolderGit2, Sparkles,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useForge, newId } from "@/lib/store";
 import { CVSidebar } from "@/components/cv/cv-sidebar";
 import { CVBuilder } from "@/components/cv/cv-builder";
@@ -13,6 +18,17 @@ export const Route = createFileRoute("/cv")({
   }),
   component: CVPage,
 });
+
+const BUILDER_TABS = [
+  { id: "personal",   label: "Personal",   icon: User },
+  { id: "experience", label: "Experience", icon: Briefcase },
+  { id: "skills",     label: "Skills",     icon: Code2 },
+  { id: "education",  label: "Education",  icon: GraduationCap },
+  { id: "projects",   label: "Projects",   icon: FolderGit2 },
+  { id: "ats",        label: "ATS Check",  icon: Sparkles },
+] as const;
+
+type BuilderTab = typeof BUILDER_TABS[number]["id"];
 
 function defaultCV(id: string): CVProfile {
   return {
@@ -35,6 +51,7 @@ function CVPage() {
   const { cvProfiles, upsertCVProfile, deleteCVProfile } = useForge();
   const [activeCVId, setActiveCVId] = useState<string | null>(null);
   const [draft, setDraft] = useState<CVProfile | null>(null);
+  const [activeTab, setActiveTab] = useState<BuilderTab>("personal");
 
   useEffect(() => {
     if (cvProfiles.length > 0 && !activeCVId) {
@@ -54,6 +71,7 @@ function CVPage() {
     const cv = defaultCV(id);
     setActiveCVId(id);
     setDraft(cv);
+    setActiveTab("personal");
   };
 
   const handleSave = async () => {
@@ -79,9 +97,24 @@ function CVPage() {
     <PageContainer>
       <PageSection>
         <PageHeader
+          icon={FileText}
           title="CV Builder"
-          description="Create tailored CVs for Frontend, Backend, and Fullstack roles. Check ATS compatibility before applying."
-          className="mb-6"
+          description="Create tailored CVs for each role and check ATS compatibility before applying."
+          className="mb-4"
+          actions={
+            draft ? (
+              <Button onClick={handleSave} size="sm" className="gap-2 shrink-0">
+                <Save className="size-3.5" /> Save CV
+              </Button>
+            ) : undefined
+          }
+        />
+        <TabNav
+          tabs={BUILDER_TABS.map((t) => ({
+            ...t,
+            onClick: () => setActiveTab(t.id),
+          }))}
+          activeTab={activeTab}
         />
       </PageSection>
 
@@ -97,11 +130,10 @@ function CVPage() {
             />
           }
           sidebarWidth="lg:w-[260px]"
-          className=""
         >
           <div className="h-full overflow-hidden">
             {draft ? (
-              <CVBuilder cv={draft} onUpdate={setDraft} onSave={handleSave} />
+              <CVBuilder cv={draft} onUpdate={setDraft} activeTab={activeTab} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground gap-4 p-8">
                 <div className="size-14 rounded-full bg-muted/20 flex items-center justify-center">

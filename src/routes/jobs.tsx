@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { PageContainer, PageHeader, PageSection, TabNav } from "@/components/layout";
 import { SplitLayout } from "@/components/layout/split-layout";
+import { Briefcase } from "lucide-react";
 import { JobsSidebar } from "@/components/jobs/jobs-sidebar";
 import { JobEditor } from "@/components/jobs/job-editor";
 import { OffersSidebar } from "@/components/jobs/offers-sidebar";
@@ -21,8 +22,8 @@ export const Route = createFileRoute("/jobs")({
 });
 
 const TABS = [
-  { id: "jobs", label: "Jobs" },
-  { id: "offers", label: "Offers" },
+  { id: "jobs",     label: "Jobs" },
+  { id: "offers",   label: "Offers" },
   { id: "services", label: "Services" },
 ] as const;
 
@@ -56,6 +57,12 @@ function mapService(x: any): MyService {
     updatedAt: x.updated_at ? new Date(x.updated_at).getTime() : Date.now(),
   };
 }
+
+const tabDescriptions: Record<string, string> = {
+  jobs:     "Browse live remote jobs and track your applications.",
+  offers:   "Track freelance offers from Mostaql, Upwork, Freelancer and more.",
+  services: "Manage your service listings on Fiverr, Mostaql, Khamsat and others.",
+};
 
 function JobsPage() {
   const { tab = "jobs" } = Route.useSearch();
@@ -176,20 +183,15 @@ function JobsPage() {
     toast.success("Service removed.");
   };
 
-  const activeJob = jobs.find((j) => j.id === activeJobId) ?? null;
-  const activeOffer = offers.find((o) => o.id === activeOfferId) ?? null;
+  const activeJob     = jobs.find((j) => j.id === activeJobId) ?? null;
+  const activeOffer   = offers.find((o) => o.id === activeOfferId) ?? null;
   const activeService = services.find((s) => s.id === activeServiceId) ?? null;
-
-  const tabDescriptions: Record<string, string> = {
-    jobs: "Browse live remote jobs and track your applications.",
-    offers: "Track freelance offers from Mostaql, Upwork, Freelancer and more.",
-    services: "Manage your service listings on Fiverr, Mostaql, Khamsat and others.",
-  };
 
   return (
     <PageContainer className="overflow-hidden">
       <PageSection>
         <PageHeader
+          icon={Briefcase}
           eyebrow="Freelance"
           title="Jobs & Freelance"
           description={tabDescriptions[tab]}

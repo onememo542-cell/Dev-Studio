@@ -20,6 +20,16 @@ const PlatformIcon = ({ platform }: { platform: string }) => {
   return <Instagram className="size-3.5" />;
 };
 
+type DraftFilter = "all" | "recent" | "older";
+
+const FILTERS: { label: string; value: DraftFilter }[] = [
+  { label: "All", value: "all" },
+  { label: "Recent", value: "recent" },
+  { label: "Older", value: "older" },
+];
+
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 export function SocialSidebar({
   platform,
   drafts,
@@ -30,27 +40,47 @@ export function SocialSidebar({
 }: SocialSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<DraftFilter>("all");
 
-  const platformDrafts = drafts.filter((d) =>
-    d.platform === platform &&
-    (d.content?.toLowerCase() || "").includes(searchQuery.toLowerCase())
-  );
-  const { page, setPage, totalPages, paged, total, pageSize } = usePagination(platformDrafts, 15);
+  const now = Date.now();
+
+  const platformDrafts = drafts.filter((d) => d.platform === platform);
+
+  const filtered = platformDrafts.filter((d) => {
+    const matchesSearch = (d.content?.toLowerCase() ?? "").includes(searchQuery.toLowerCase());
+    const age = now - new Date(d.updatedAt).getTime();
+    const matchesFilter =
+      activeFilter === "all" ||
+      (activeFilter === "recent" && age <= ONE_WEEK_MS) ||
+      (activeFilter === "older" && age > ONE_WEEK_MS);
+    return matchesSearch && matchesFilter;
+  });
+
+  const { page, setPage, totalPages, paged, total, pageSize } = usePagination(filtered, 15);
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="px-3 py-2.5 border-b border-border/60 shrink-0 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="size-7 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
-              <PlatformIcon platform={platform} />
-            </div>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60 capitalize">
-              {platform} ({platformDrafts.length})
-            </span>
+      {/* Header */}
+      <div className="px-3 py-2.5 border-b border-border/60 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="size-7 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
+            <PlatformIcon platform={platform} />
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60 capitalize">
+            {platform} ({platformDrafts.length})
+          </span>
         </div>
+        <button
+          onClick={onNewDraft}
+          className="size-6 rounded-lg bg-primary/10 grid place-items-center text-primary hover:bg-primary/20 transition-colors shrink-0"
+          title="New Draft"
+        >
+          <Plus className="size-3.5" />
+        </button>
+      </div>
 
+      {/* Search */}
+      <div className="px-2 pt-2 shrink-0">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
           <input
@@ -63,8 +93,29 @@ export function SocialSidebar({
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="px-2 pt-1.5 pb-1.5 flex items-center gap-1 shrink-0">
+        {FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setActiveFilter(f.value)}
+            className={`text-[10px] px-2 py-1 rounded-lg font-medium transition-colors ${
+              activeFilter === f.value
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Divider */}
+      <div className="mx-2 border-t border-border/60 shrink-0" />
+
+      {/* List */}
       <nav className="overflow-y-auto p-2 space-y-0.5 scrollbar-thin flex-1">
-        {platformDrafts.length > 0 ? (
+        {filtered.length > 0 ? (
           paged.map((draft) => (
             <div
               key={draft.id}
@@ -97,12 +148,15 @@ export function SocialSidebar({
             <div className="size-8 rounded-xl bg-muted/30 grid place-items-center">
               <Plus className="size-4 opacity-50" />
             </div>
-            {searchQuery ? "No matching drafts" : "No drafts yet"}
+            {searchQuery || activeFilter !== "all" ? "No matching drafts" : "No drafts yet"}
           </div>
         )}
       </nav>
+
       <ListPagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} onPageChange={setPage} />
-      <div className="p-2 pt-0 shrink-0">
+
+      {/* Bottom Action */}
+      <div className="px-2 pb-2 shrink-0">
         <button
           onClick={onNewDraft}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/15 text-xs font-semibold transition-colors border border-primary/20"

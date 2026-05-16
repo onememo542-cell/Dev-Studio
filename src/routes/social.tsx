@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { PageHeader, PageContainer, PageSection, TabNav, SplitLayout } from "@/components/layout";
-import { Linkedin, Twitter, Instagram } from "lucide-react";
+import { Linkedin, Twitter, Instagram, Share2 } from "lucide-react";
 import { z } from "zod";
 import { useForge, newId } from "@/lib/store";
 import { SocialSidebar } from "@/components/social/social-sidebar";
@@ -21,9 +21,9 @@ export const Route = createFileRoute("/social")({
 });
 
 const SOCIAL_TABS = [
-  { id: "linkedin", label: "LinkedIn", icon: Linkedin },
-  { id: "twitter", label: "X / Twitter", icon: Twitter },
-  { id: "instagram", label: "Instagram", icon: Instagram },
+  { id: "linkedin",  label: "LinkedIn",    icon: Linkedin },
+  { id: "twitter",   label: "X / Twitter", icon: Twitter },
+  { id: "instagram", label: "Instagram",   icon: Instagram },
 ];
 
 function SocialPage() {
@@ -34,7 +34,6 @@ function SocialPage() {
   const { socialDrafts, upsertSocialDraft, deleteSocialDraft } = useForge();
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
 
-  // Switch active draft when platform changes
   useEffect(() => {
     const platformDrafts = socialDrafts.filter((d) => d.platform === tab);
     if (platformDrafts.length > 0 && !platformDrafts.some((d) => d.id === activeDraftId)) {
@@ -69,9 +68,10 @@ function SocialPage() {
     <PageContainer>
       <PageSection>
         <PageHeader
-          title="Social Media Management"
+          icon={Share2}
+          title="Social Media"
           description="Manage your posts, threads, and updates across all social platforms."
-          className="mb-6"
+          className="mb-4"
         />
         <TabNav
           tabs={SOCIAL_TABS.map((t) => ({

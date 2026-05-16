@@ -1,4 +1,4 @@
-import { Mail, MessageCircle, FileText, Plus, Trash2 } from "lucide-react";
+import { Mail, MessageCircle, FileText, Plus, Trash2, Search } from "lucide-react";
 import { useState } from "react";
 import { usePagination } from "@/hooks/use-pagination";
 import { ListPagination } from "@/components/ui/list-pagination";
@@ -14,6 +14,22 @@ interface MailsSidebarProps {
   onDeleteTemplate: (id: string) => void;
 }
 
+type MailFilter = "all" | "recent" | "az";
+
+const FILTERS: { label: string; value: MailFilter }[] = [
+  { label: "All", value: "all" },
+  { label: "Recent", value: "recent" },
+  { label: "A–Z", value: "az" },
+];
+
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+const ChannelIcon = ({ channel }: { channel: string }) => {
+  if (channel === "cover-letter") return <FileText className="size-3.5" />;
+  if (channel === "gmail") return <Mail className="size-3.5" />;
+  return <MessageCircle className="size-3.5" />;
+};
+
 export function MailsSidebar({
   channel,
   templates,
@@ -23,26 +39,91 @@ export function MailsSidebar({
   onDeleteTemplate,
 }: MailsSidebarProps) {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<MailFilter>("all");
+
+  const now = Date.now();
+
   const channelTemplates = templates.filter((t) => t.channel === channel);
-  const { page, setPage, totalPages, paged, total, pageSize } = usePagination(channelTemplates, 15);
+
+  let filtered = channelTemplates.filter((t) => {
+    const matchesSearch =
+      (t.subject ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.content ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+    const age = now - new Date(t.updatedAt).getTime();
+    const matchesFilter =
+      activeFilter === "all" ||
+      activeFilter === "az" ||
+      (activeFilter === "recent" && age <= ONE_WEEK_MS);
+    return matchesSearch && matchesFilter;
+  });
+
+  if (activeFilter === "az") {
+    filtered = [...filtered].sort((a, b) =>
+      (a.subject ?? "").localeCompare(b.subject ?? "")
+    );
+  }
+
+  const { page, setPage, totalPages, paged, total, pageSize } = usePagination(filtered, 15);
 
   return (
     <div className="flex flex-col h-full min-h-0">
+      {/* Header */}
       <div className="px-3 py-2.5 border-b border-border/60 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <div className="size-7 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
-            {channel === "cover-letter" && <FileText className="size-3.5" />}
-            {channel === "gmail" && <Mail className="size-3.5" />}
-            {channel === "whatsapp" && <MessageCircle className="size-3.5" />}
+            <ChannelIcon channel={channel} />
           </div>
           <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60 capitalize">
             {channel.replace("-", " ")} ({channelTemplates.length})
           </span>
         </div>
+        <button
+          onClick={onNewTemplate}
+          className="size-6 rounded-lg bg-primary/10 grid place-items-center text-primary hover:bg-primary/20 transition-colors shrink-0"
+          title="New Template"
+        >
+          <Plus className="size-3.5" />
+        </button>
       </div>
 
+      {/* Search */}
+      <div className="px-2 pt-2 shrink-0">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search templates…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-muted/40 border border-border/60 rounded-xl py-1.5 pl-8 pr-3 text-xs outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/40 transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="px-2 pt-1.5 pb-1.5 flex items-center gap-1 shrink-0">
+        {FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setActiveFilter(f.value)}
+            className={`text-[10px] px-2 py-1 rounded-lg font-medium transition-colors ${
+              activeFilter === f.value
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Divider */}
+      <div className="mx-2 border-t border-border/60 shrink-0" />
+
+      {/* List */}
       <nav className="overflow-y-auto p-2 space-y-0.5 scrollbar-thin flex-1">
-        {channelTemplates.length > 0 ? (
+        {filtered.length > 0 ? (
           paged.map((template) => (
             <div
               key={template.id}
@@ -78,12 +159,15 @@ export function MailsSidebar({
             <div className="size-8 rounded-xl bg-muted/30 grid place-items-center">
               <Plus className="size-4 opacity-50" />
             </div>
-            No templates yet
+            {searchQuery || activeFilter !== "all" ? "No matching templates" : "No templates yet"}
           </div>
         )}
       </nav>
+
       <ListPagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} onPageChange={setPage} />
-      <div className="p-2 pt-0 shrink-0">
+
+      {/* Bottom Action */}
+      <div className="px-2 pb-2 shrink-0">
         <button
           onClick={onNewTemplate}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/15 text-xs font-semibold transition-colors border border-primary/20"

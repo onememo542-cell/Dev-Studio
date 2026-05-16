@@ -18,6 +18,7 @@ import {
   Users,
   Briefcase,
   FileText,
+  CalendarDays,
 } from "lucide-react";
 import { CommandPalette } from "./command-palette";
 import { ErrorBoundary } from "./error-boundary";
@@ -32,6 +33,7 @@ import {
 
 const WORKSPACE_NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/planner", label: "Planner", icon: CalendarDays },
   { to: "/tools", label: "Tools", icon: Code2 },
 ] as const;
 

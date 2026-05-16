@@ -1,7 +1,4 @@
-import { useState } from "react";
-import { Save, User, Briefcase, GraduationCap, Code2, FolderGit2, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/tools/shared";
+import { User, Briefcase, GraduationCap, Code2, FolderGit2, Sparkles } from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -14,73 +11,49 @@ import { ATSChecker } from "./ats-checker";
 import type { CVProfile, CVFocus } from "@/types/cv";
 import { FOCUS_LABELS } from "@/types/cv";
 
-interface CVBuilderProps {
-  cv: CVProfile;
-  onUpdate: (cv: CVProfile) => void;
-  onSave: () => void;
-}
-
 const BUILDER_TABS = [
-  { id: "personal", label: "Personal", icon: User },
+  { id: "personal",   label: "Personal",   icon: User },
   { id: "experience", label: "Experience", icon: Briefcase },
-  { id: "skills", label: "Skills", icon: Code2 },
-  { id: "education", label: "Education", icon: GraduationCap },
-  { id: "projects", label: "Projects", icon: FolderGit2 },
-  { id: "ats", label: "ATS Check", icon: Sparkles },
+  { id: "skills",     label: "Skills",     icon: Code2 },
+  { id: "education",  label: "Education",  icon: GraduationCap },
+  { id: "projects",   label: "Projects",   icon: FolderGit2 },
+  { id: "ats",        label: "ATS Check",  icon: Sparkles },
 ] as const;
 
 type BuilderTab = typeof BUILDER_TABS[number]["id"];
 
-export function CVBuilder({ cv, onUpdate, onSave }: CVBuilderProps) {
-  const [activeTab, setActiveTab] = useState<BuilderTab>("personal");
+interface CVBuilderProps {
+  cv: CVProfile;
+  onUpdate: (cv: CVProfile) => void;
+  activeTab: BuilderTab;
+}
 
+export function CVBuilder({ cv, onUpdate, activeTab }: CVBuilderProps) {
   const patch = <K extends keyof CVProfile>(key: K, value: CVProfile[K]) =>
     onUpdate({ ...cv, [key]: value, updatedAt: Date.now() });
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Toolbar */}
-      <div className="border-b border-border px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="flex-1 flex items-center gap-3 min-w-0">
-          <Input
-            type="text"
-            value={cv.title}
-            onChange={(e) => patch("title", e.target.value)}
-            placeholder="CV Title (e.g. Frontend Engineer CV)"
-            className="max-w-[280px] font-medium"
-          />
-          <Select value={cv.focus} onValueChange={(v) => patch("focus", v as CVFocus)}>
-            <SelectTrigger className="w-36 h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(FOCUS_LABELS) as CVFocus[]).map((f) => (
-                <SelectItem key={f} value={f}>{FOCUS_LABELS[f]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button onClick={onSave} size="sm" className="gap-2 shrink-0">
-          <Save className="size-3.5" /> Save CV
-        </Button>
-      </div>
 
-      {/* Tab Nav */}
-      <div className="flex items-center gap-0.5 border-b border-border px-3 overflow-x-auto scrollbar-thin">
-        {BUILDER_TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-colors -mb-px ${
-              activeTab === id
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            } ${id === "ats" ? "ml-auto text-primary/80" : ""}`}
-          >
-            <Icon className="size-3.5" />
-            {label}
-          </button>
-        ))}
+      {/* Compact CV context bar — title input + focus select */}
+      <div className="shrink-0 border-b border-border/60 bg-muted/20 px-4 py-2 flex items-center gap-2">
+        <input
+          type="text"
+          value={cv.title}
+          onChange={(e) => patch("title", e.target.value)}
+          placeholder="CV title…"
+          className="flex-1 max-w-[220px] h-7 rounded-md border border-input bg-background/80 px-2.5 text-xs font-medium outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/40 transition-all placeholder:text-muted-foreground/50"
+        />
+        <Select value={cv.focus} onValueChange={(v) => patch("focus", v as CVFocus)}>
+          <SelectTrigger className="w-32 h-7 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {(Object.keys(FOCUS_LABELS) as CVFocus[]).map((f) => (
+              <SelectItem key={f} value={f}>{FOCUS_LABELS[f]}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Content */}
@@ -104,7 +77,9 @@ export function CVBuilder({ cv, onUpdate, onSave }: CVBuilderProps) {
                       placeholder={`Write a concise 2-4 sentence summary that highlights your experience, tech stack, and what you bring to the role.\n\nExample: Senior Frontend Engineer with 5+ years building scalable web applications using React and TypeScript...`}
                       className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     />
-                    <p className="text-[10px] text-muted-foreground">{cv.summary.length} characters · Aim for 300-600 characters for optimal ATS performance</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {cv.summary.length} characters · Aim for 300–600 characters for optimal ATS performance
+                    </p>
                   </div>
                 </Section>
               )}

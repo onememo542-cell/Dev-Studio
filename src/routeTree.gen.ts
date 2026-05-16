@@ -15,6 +15,7 @@ import { Route as SoftSkillsRouteImport } from './routes/soft-skills'
 import { Route as SocialRouteImport } from './routes/social'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as MailsRouteImport } from './routes/mails'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as InterviewRouteImport } from './routes/interview'
@@ -51,6 +52,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlannerRoute = PlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MailsRoute = MailsRouteImport.update({
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/interview': typeof InterviewRoute
   '/jobs': typeof JobsRoute
   '/mails': typeof MailsRoute
+  '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/interview': typeof InterviewRoute
   '/jobs': typeof JobsRoute
   '/mails': typeof MailsRoute
+  '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/interview': typeof InterviewRoute
   '/jobs': typeof JobsRoute
   '/mails': typeof MailsRoute
+  '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/social': typeof SocialRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/interview'
     | '/jobs'
     | '/mails'
+    | '/planner'
     | '/profile'
     | '/sitemap.xml'
     | '/social'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/interview'
     | '/jobs'
     | '/mails'
+    | '/planner'
     | '/profile'
     | '/sitemap.xml'
     | '/social'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/interview'
     | '/jobs'
     | '/mails'
+    | '/planner'
     | '/profile'
     | '/sitemap.xml'
     | '/social'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   InterviewRoute: typeof InterviewRoute
   JobsRoute: typeof JobsRoute
   MailsRoute: typeof MailsRoute
+  PlannerRoute: typeof PlannerRoute
   ProfileRoute: typeof ProfileRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SocialRoute: typeof SocialRoute
@@ -241,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planner': {
+      id: '/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof PlannerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mails': {
@@ -303,6 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   InterviewRoute: InterviewRoute,
   JobsRoute: JobsRoute,
   MailsRoute: MailsRoute,
+  PlannerRoute: PlannerRoute,
   ProfileRoute: ProfileRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SocialRoute: SocialRoute,

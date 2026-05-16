@@ -15,6 +15,7 @@ import profileRoutes from "./routes/api/profile.js";
 import chatRoutes from "./routes/api/chat.js";
 import authRoutes from "./routes/api/auth.js";
 import cvRoutes from "./routes/api/cv.js";
+import plannerRoutes from "./routes/api/planner.js";
 
 export function registerRoutes(app: Express) {
   // --- Auth ---
@@ -36,6 +37,7 @@ export function registerRoutes(app: Express) {
   app.use("/api/services", serviceRoutes);
   app.use("/api/profile", profileRoutes);
   app.use("/api/cv", cvRoutes);
+  app.use("/api/planner", plannerRoutes);
 
   // --- Legacy Backward Compatibility ---
   

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { PageHeader, PageContainer, PageSection } from "@/components/layout";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useForge } from "@/lib/store";
@@ -55,6 +56,7 @@ function ProfilePage() {
     <PageContainer className="overflow-y-auto">
       <PageSection>
         <PageHeader
+          icon={User}
           eyebrow="Account"
           title="Profile"
           description="Your Dev Studio profile and account settings."

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, PageContainer, PageSection, TabNav } from "@/components/layout";
 import { QuestionList } from "@/components/interview/question-list";
-import { MessageSquare, ListChecks } from "lucide-react";
+import { GraduationCap, MessageSquare, ListChecks } from "lucide-react";
 import { useState } from "react";
 
 type InterviewTab = "questions" | "chat";
@@ -10,10 +10,7 @@ export const Route = createFileRoute("/interview")({
   head: () => ({
     meta: [
       { title: "Interview — Dev Studio" },
-      {
-        name: "description",
-        content: "Top interview Q&A for frontend, backend, DevOps and testing.",
-      },
+      { name: "description", content: "Top interview Q&A for frontend, backend, DevOps and testing." },
     ],
   }),
   component: InterviewPage,
@@ -23,17 +20,18 @@ function InterviewPage() {
   const [tab, setTab] = useState<InterviewTab>("questions");
 
   const tabs = [
-    { id: "questions", label: "Questions", icon: ListChecks },
-    { id: "chat", label: "AI Mock Chat", icon: MessageSquare },
+    { id: "questions", label: "Questions",    icon: ListChecks },
+    { id: "chat",      label: "AI Mock Chat", icon: MessageSquare },
   ] as const;
 
   return (
     <PageContainer>
       <PageSection>
         <PageHeader
+          icon={GraduationCap}
           title="Interview Preparation"
           description="Master common and advanced interview questions across all engineering domains."
-          className="mb-6"
+          className="mb-4"
         />
         <TabNav
           tabs={tabs.map((t) => ({

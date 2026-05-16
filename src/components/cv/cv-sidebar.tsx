@@ -1,7 +1,7 @@
-import { FileText, Plus, Trash2 } from "lucide-react";
+import { FileText, Plus, Trash2, Search } from "lucide-react";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { CVProfile } from "@/types/cv";
+import type { CVProfile, CVFocus } from "@/types/cv";
 import { FOCUS_COLORS, FOCUS_LABELS } from "@/types/cv";
 
 interface CVSidebarProps {
@@ -12,11 +12,26 @@ interface CVSidebarProps {
   onDeleteCV: (id: string) => void;
 }
 
+const FILTERS: { label: string; value: CVFocus | "all" }[] = [
+  { label: "All", value: "all" },
+  { label: "Frontend", value: "frontend" },
+  { label: "Fullstack", value: "fullstack" },
+];
+
 export function CVSidebar({ cvProfiles, activeCVId, onSelectCV, onNewCV, onDeleteCV }: CVSidebarProps) {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<CVFocus | "all">("all");
+
+  const filtered = cvProfiles.filter((cv) => {
+    const matchesSearch = (cv.title ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = activeFilter === "all" || cv.focus === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <div className="flex flex-col h-full min-h-0">
+      {/* Header */}
       <div className="px-3 py-2.5 border-b border-border/60 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <div className="size-7 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
@@ -26,11 +41,53 @@ export function CVSidebar({ cvProfiles, activeCVId, onSelectCV, onNewCV, onDelet
             CV Profiles ({cvProfiles.length})
           </span>
         </div>
+        <button
+          onClick={onNewCV}
+          className="size-6 rounded-lg bg-primary/10 grid place-items-center text-primary hover:bg-primary/20 transition-colors shrink-0"
+          title="New CV Profile"
+        >
+          <Plus className="size-3.5" />
+        </button>
       </div>
 
+      {/* Search */}
+      <div className="px-2 pt-2 shrink-0">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search profiles…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-muted/40 border border-border/60 rounded-xl py-1.5 pl-8 pr-3 text-xs outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/40 transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="px-2 pt-1.5 pb-1.5 flex items-center gap-1 shrink-0">
+        {FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setActiveFilter(f.value)}
+            className={`text-[10px] px-2 py-1 rounded-lg font-medium transition-colors ${
+              activeFilter === f.value
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Divider */}
+      <div className="mx-2 border-t border-border/60 shrink-0" />
+
+      {/* List */}
       <nav className="overflow-y-auto p-2 space-y-0.5 scrollbar-thin flex-1">
-        {cvProfiles.length > 0 ? (
-          cvProfiles.map((cv) => (
+        {filtered.length > 0 ? (
+          filtered.map((cv) => (
             <div
               key={cv.id}
               className={`group relative w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer ${
@@ -66,12 +123,13 @@ export function CVSidebar({ cvProfiles, activeCVId, onSelectCV, onNewCV, onDelet
             <div className="size-8 rounded-xl bg-muted/30 grid place-items-center">
               <Plus className="size-4 opacity-50" />
             </div>
-            No CVs yet — create your first one
+            {searchQuery || activeFilter !== "all" ? "No matching profiles" : "No CVs yet — create your first one"}
           </div>
         )}
       </nav>
 
-      <div className="p-2 pt-0 shrink-0">
+      {/* Bottom Action */}
+      <div className="px-2 pb-2 shrink-0">
         <button
           onClick={onNewCV}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/15 text-xs font-semibold transition-colors border border-primary/20"
