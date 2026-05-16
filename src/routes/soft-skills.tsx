@@ -1,6 +1,6 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { SoftSkillView } from "@/components/soft-skills/soft-skill-view";
-import { PageHeader, PageContainer } from "@/components/layout";
+import { PageHeader, PageContainer, PageSection } from "@/components/layout";
 import { z } from "zod";
 
 const searchSchema = z.object({
@@ -39,15 +39,13 @@ function SoftSkillsPage() {
 
   return (
     <PageContainer>
-      <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-border bg-background">
-        <div className="max-w-[1400px] mx-auto w-full">
-          <PageHeader
-            title="Communication & Soft Skills"
-            description="Master the art of collaboration, leadership, and emotional intelligence."
-            className="mb-0 sm:mb-2"
-          />
-        </div>
-      </div>
+      <PageSection>
+        <PageHeader
+          title="Communication & Soft Skills"
+          description="Master the art of collaboration, leadership, and emotional intelligence."
+          className="mb-0 sm:mb-2"
+        />
+      </PageSection>
 
       <div className="flex-1 overflow-hidden">
         <SoftSkillView activeTab={tab} />

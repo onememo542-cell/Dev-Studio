@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { PageHeader, PageContainer, TabNav, SplitLayout } from "@/components/layout";
+import { PageHeader, PageContainer, PageSection, TabNav, SplitLayout } from "@/components/layout";
 import { Mail, Send, MessageCircle } from "lucide-react";
 import { z } from "zod";
 import { useForge, newId } from "@/lib/store";
@@ -67,24 +67,20 @@ function MailsPage() {
 
   return (
     <PageContainer>
-      <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-border bg-background">
-        <div className="max-w-[1400px] mx-auto w-full">
-          <PageHeader
-            title="Communication Hub"
-            description="Manage your professional emails, cover letters, and outreach templates."
-            className="mb-6"
-          />
-          <div className="w-full">
-            <TabNav
-              tabs={MAIL_TABS.map((t) => ({
-                ...t,
-                onClick: () => navigate({ to: ".", search: { tab: t.id } }),
-              }))}
-              activeTab={tab}
-            />
-          </div>
-        </div>
-      </div>
+      <PageSection>
+        <PageHeader
+          title="Communication Hub"
+          description="Manage your professional emails, cover letters, and outreach templates."
+          className="mb-6"
+        />
+        <TabNav
+          tabs={MAIL_TABS.map((t) => ({
+            ...t,
+            onClick: () => navigate({ to: ".", search: { tab: t.id } }),
+          }))}
+          activeTab={tab}
+        />
+      </PageSection>
 
       <div className="flex-1 overflow-hidden">
         <SplitLayout

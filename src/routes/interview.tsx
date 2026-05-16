@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader, PageContainer, TabNav } from "@/components/layout";
+import { PageHeader, PageContainer, PageSection, TabNav } from "@/components/layout";
 import { QuestionList } from "@/components/interview/question-list";
 import { MessageSquare, ListChecks } from "lucide-react";
 import { useState } from "react";
@@ -29,25 +29,20 @@ function InterviewPage() {
 
   return (
     <PageContainer>
-      <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-border bg-background">
-        <div className="max-w-[1400px] mx-auto w-full">
-          <PageHeader
-            title="Interview Preparation"
-            description="Master common and advanced interview questions across all engineering domains."
-            className="mb-6"
-          />
-
-          <div className="w-full">
-            <TabNav
-              tabs={tabs.map((t) => ({
-                ...t,
-                onClick: () => setTab(t.id as InterviewTab),
-              }))}
-              activeTab={tab}
-            />
-          </div>
-        </div>
-      </div>
+      <PageSection>
+        <PageHeader
+          title="Interview Preparation"
+          description="Master common and advanced interview questions across all engineering domains."
+          className="mb-6"
+        />
+        <TabNav
+          tabs={tabs.map((t) => ({
+            ...t,
+            onClick: () => setTab(t.id as InterviewTab),
+          }))}
+          activeTab={tab}
+        />
+      </PageSection>
       <div className="flex-1 overflow-hidden">
         {tab === "questions" ? (
           <QuestionList />

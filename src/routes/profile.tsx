@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
-import { PageHeader, PageContainer } from "@/components/layout";
+import { PageHeader, PageContainer, PageSection } from "@/components/layout";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -51,16 +51,13 @@ function ProfilePage() {
 
   return (
     <PageContainer className="overflow-y-auto">
-      <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-border bg-background">
-        <div className="max-w-[1400px] mx-auto">
-          <PageHeader
-            eyebrow="Account"
-            title="Profile"
-            description="Your Dev Studio profile and account settings."
-            className="mb-8"
-          />
-        </div>
-      </div>
+      <PageSection>
+        <PageHeader
+          eyebrow="Account"
+          title="Profile"
+          description="Your Dev Studio profile and account settings."
+        />
+      </PageSection>
       <div className="flex-1 p-4 sm:p-8">
         <div className="max-w-[600px] mx-auto space-y-6">
 

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader, PageContainer, TabNav } from "@/components/layout";
+import { PageHeader, PageContainer, PageSection, TabNav } from "@/components/layout";
 import { Sparkles, Bot, Component as ComponentIcon, LayoutTemplate, Code2 } from "lucide-react";
 import { Prompts } from "@/components/tools/prompts";
 import { Agents } from "@/components/tools/agents";
@@ -42,26 +42,21 @@ function ToolsPage() {
 
   return (
     <PageContainer>
-      <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-border bg-background min-w-0 w-full">
-        <div className="max-w-[1400px] mx-auto min-w-0 w-full">
-          <PageHeader
-            eyebrow="Asset Library"
-            title="Tools & Assets"
-            description="A unified dashboard for all your prompts, agents, and reusable building blocks."
-            className="mb-6"
-          />
-
-          <div className="w-full min-w-0">
-            <TabNav
-              tabs={tabs.map((t) => ({
-                ...t,
-                onClick: () => setTab(t.id as ToolTab),
-              }))}
-              activeTab={tab as string}
-            />
-          </div>
-        </div>
-      </div>
+      <PageSection>
+        <PageHeader
+          eyebrow="Asset Library"
+          title="Tools & Assets"
+          description="A unified dashboard for all your prompts, agents, and reusable building blocks."
+          className="mb-6"
+        />
+        <TabNav
+          tabs={tabs.map((t) => ({
+            ...t,
+            onClick: () => setTab(t.id as ToolTab),
+          }))}
+          activeTab={tab as string}
+        />
+      </PageSection>
 
       <div className="flex-1 min-h-0 flex flex-col">
         {tab === "prompts" && <Prompts selectedId={id} />}

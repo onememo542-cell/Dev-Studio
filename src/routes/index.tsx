@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useForge } from "@/lib/store";
-import { PageHeader, PageContainer } from "@/components/layout";
+import { PageHeader, PageContainer, PageSection } from "@/components/layout";
 import {
   Sparkles,
   Bot,
@@ -221,8 +221,7 @@ function Index() {
 
   return (
     <PageContainer className="overflow-y-auto">
-      <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-border bg-background">
-        <div className="max-w-[1400px] mx-auto">
+      <PageSection>
           <PageHeader
             eyebrow="Welcome back"
             title="Your development hub"
@@ -238,8 +237,7 @@ function Index() {
               </Link>
             }
           />
-        </div>
-      </div>
+      </PageSection>
 
       <div className="flex-1 p-4 sm:p-8">
         <div className="max-w-[1400px] mx-auto w-full">

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { PageContainer, PageHeader } from "@/components/layout";
+import { PageContainer, PageHeader, PageSection, TabNav } from "@/components/layout";
 import { SplitLayout } from "@/components/layout/split-layout";
 import { JobsSidebar } from "@/components/jobs/jobs-sidebar";
 import { JobEditor } from "@/components/jobs/job-editor";
@@ -188,40 +188,22 @@ function JobsPage() {
 
   return (
     <PageContainer className="overflow-hidden">
-      <div className="px-4 sm:px-8 pt-6 sm:pt-8 pb-3 border-b border-border bg-background shrink-0">
-        <div className="max-w-[1400px] mx-auto">
-          <PageHeader
-            eyebrow="Freelance"
-            title="Jobs & Freelance"
-            description={tabDescriptions[tab]}
-            className="mb-4"
-          />
-          <div className="flex items-center gap-1">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => navigate({ search: { tab: t.id } })}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  tab === t.id
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-border"
-                    : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40"
-                }`}
-              >
-                {t.label}
-                {t.id === "jobs" && jobs.length > 0 && (
-                  <span className="ml-1.5 text-[10px] bg-muted px-1 rounded">{jobs.length}</span>
-                )}
-                {t.id === "offers" && offers.length > 0 && (
-                  <span className="ml-1.5 text-[10px] bg-muted px-1 rounded">{offers.length}</span>
-                )}
-                {t.id === "services" && services.length > 0 && (
-                  <span className="ml-1.5 text-[10px] bg-muted px-1 rounded">{services.length}</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      <PageSection>
+        <PageHeader
+          eyebrow="Freelance"
+          title="Jobs & Freelance"
+          description={tabDescriptions[tab]}
+          className="mb-4"
+        />
+        <TabNav
+          tabs={[
+            { id: "jobs",     label: "Jobs",     badge: jobs.length || undefined,     onClick: () => navigate({ search: { tab: "jobs" } }) },
+            { id: "offers",   label: "Offers",   badge: offers.length || undefined,   onClick: () => navigate({ search: { tab: "offers" } }) },
+            { id: "services", label: "Services", badge: services.length || undefined, onClick: () => navigate({ search: { tab: "services" } }) },
+          ]}
+          activeTab={tab}
+        />
+      </PageSection>
 
       <div className="flex-1 min-h-0">
         {tab === "jobs" && (
