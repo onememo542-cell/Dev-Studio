@@ -106,13 +106,30 @@ function NavItem({ item, active, isCollapsed }: { item: any; active: boolean; is
   );
 }
 
+const SIDEBAR_KEY = "ds-sidebar-collapsed";
+
+function readSidebarPref(): boolean {
+  try { return localStorage.getItem(SIDEBAR_KEY) !== "false"; } catch { return true; }
+}
+
+function writeSidebarPref(collapsed: boolean) {
+  try { localStorage.setItem(SIDEBAR_KEY, String(collapsed)); } catch {}
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(readSidebarPref);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const toggleCollapsed = () => {
+    setIsCollapsed((prev) => {
+      writeSidebarPref(!prev);
+      return !prev;
+    });
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -274,7 +291,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Menu className="size-4" />
             </button>
             <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={toggleCollapsed}
               className="hidden md:grid size-9 place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-card border border-border shrink-0"
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
