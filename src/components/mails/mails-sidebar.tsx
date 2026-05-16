@@ -28,60 +28,52 @@ export function MailsSidebar({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="p-4 border-b border-border sticky top-0 bg-background/80 backdrop-blur-md z-20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-              {channel === "cover-letter" && <FileText className="size-5" />}
-              {channel === "gmail" && <Mail className="size-5" />}
-              {channel === "whatsapp" && <MessageCircle className="size-5" />}
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold capitalize">{channel.replace("-", " ")}</h3>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-                Communication
-              </p>
-            </div>
+      <div className="px-3 py-2.5 border-b border-border/60 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="size-7 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
+            {channel === "cover-letter" && <FileText className="size-3.5" />}
+            {channel === "gmail" && <Mail className="size-3.5" />}
+            {channel === "whatsapp" && <MessageCircle className="size-3.5" />}
           </div>
-          <button
-            onClick={onNewTemplate}
-            className="flex items-center gap-1.5 text-[11px] font-medium bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:opacity-90 transition-opacity"
-          >
-            <Plus className="size-3.5" /> New
-          </button>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60 capitalize">
+            {channel.replace("-", " ")} ({channelTemplates.length})
+          </span>
         </div>
+        <button
+          onClick={onNewTemplate}
+          className="size-7 grid place-items-center rounded-xl hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+          title="New template"
+        >
+          <Plus className="size-3.5" />
+        </button>
       </div>
 
-      <nav className="overflow-y-auto p-2 space-y-1 scrollbar-thin">
+      <nav className="overflow-y-auto p-2 space-y-0.5 scrollbar-thin flex-1">
         {channelTemplates.length > 0 ? (
           paged.map((template) => (
             <div
               key={template.id}
-              className={`group relative w-full text-left px-3 py-2.5 rounded-md text-sm transition-all cursor-pointer border ${
+              className={`group relative w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer ${
                 activeTemplateId === template.id
-                  ? "bg-primary/10 text-primary border-primary/20 shadow-sm"
-                  : "text-muted-foreground hover:bg-card hover:text-foreground border-transparent"
+                  ? "bg-primary/10 text-primary ring-1 ring-primary/20"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               }`}
               onClick={() => onSelectTemplate(template.id)}
             >
               <div className="pr-6">
-                <div className={`truncate leading-snug ${activeTemplateId === template.id ? "font-medium text-foreground" : ""}`}>
+                <div className={`truncate leading-snug text-xs font-medium ${activeTemplateId === template.id ? "text-foreground" : ""}`}>
                   {template.subject || "Untitled Template"}
                 </div>
-                <div className="truncate text-[11px] text-muted-foreground mt-0.5 opacity-80">
+                <div className="truncate text-[10px] text-muted-foreground mt-0.5">
                   {template.content || "Empty content"}
                 </div>
-                <div className="text-[10px] opacity-70 mt-1 flex items-center gap-2">
-                  <span className={`shrink-0 w-1 h-1 rounded-full ${activeTemplateId === template.id ? "bg-primary" : "bg-muted-foreground"}`} />
+                <div className="text-[9px] text-muted-foreground/60 mt-1">
                   {new Date(template.updatedAt).toLocaleDateString()}
                 </div>
               </div>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPendingDeleteId(template.id);
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                onClick={(e) => { e.stopPropagation(); setPendingDeleteId(template.id); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
                 title="Delete template"
               >
                 <Trash2 className="size-3.5" />
@@ -89,8 +81,8 @@ export function MailsSidebar({
             </div>
           ))
         ) : (
-          <div className="px-3 py-8 text-xs text-muted-foreground border border-dashed border-border rounded-lg text-center flex flex-col items-center gap-2 m-2">
-            <div className="size-8 rounded-full bg-muted/20 flex items-center justify-center">
+          <div className="px-3 py-10 text-xs text-muted-foreground border border-dashed border-border/60 rounded-xl text-center flex flex-col items-center gap-2 m-2">
+            <div className="size-8 rounded-xl bg-muted/30 grid place-items-center">
               <Plus className="size-4 opacity-50" />
             </div>
             No templates yet

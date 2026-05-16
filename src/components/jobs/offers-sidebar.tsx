@@ -12,20 +12,21 @@ interface Props {
 }
 
 const statusLabel: Record<string, string> = {
-  new: "New", in_review: "In Review", accepted: "Accepted", rejected: "Rejected", completed: "Done",
+  new: "New", in_review: "In Review", accepted: "Accepted",
+  rejected: "Rejected", completed: "Done",
 };
 
 export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
   const { page, setPage, totalPages, paged, total, pageSize } = usePagination(offers, 20);
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="p-3 border-b border-border flex items-center justify-between shrink-0">
-        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+      <div className="px-3 py-2.5 border-b border-border/60 flex items-center justify-between shrink-0">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60">
           Offers ({offers.length})
         </span>
         <button
           onClick={onAdd}
-          className="size-7 grid place-items-center rounded-md hover:bg-sidebar-accent/60 text-muted-foreground hover:text-foreground transition-colors"
+          className="size-7 grid place-items-center rounded-xl hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
           title="Add offer"
         >
           <Plus className="size-3.5" />
@@ -34,7 +35,7 @@ export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
       <div className="flex-1 overflow-y-auto p-2">
         {offers.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 gap-2 text-center px-4">
-            <Handshake className="size-8 text-muted-foreground/40" />
+            <Handshake className="size-8 text-muted-foreground/30" />
             <p className="text-xs text-muted-foreground">No offers tracked yet.</p>
             <p className="text-[10px] text-muted-foreground/60">Add offers from Mostaql, Upwork, Fiverr, etc.</p>
           </div>
@@ -44,10 +45,10 @@ export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
             <li key={offer.id}>
               <button
                 onClick={() => onSelect(offer.id)}
-                className={`w-full text-left px-2.5 py-2.5 rounded-md transition-colors group ${
+                className={`w-full text-left px-3 py-2.5 rounded-xl transition-all ${
                   activeId === offer.id
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-border"
-                    : "hover:bg-sidebar-accent/40 text-muted-foreground hover:text-foreground"
+                    ? "bg-primary/10 text-primary ring-1 ring-primary/20"
+                    : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <p className="text-xs font-medium truncate leading-snug">{offer.title}</p>
@@ -56,11 +57,11 @@ export function OffersSidebar({ offers, activeId, onSelect, onAdd }: Props) {
                 )}
                 <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                   {offer.platform && (
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${PLATFORM_COLORS[offer.platform] ?? "bg-muted text-muted-foreground"}`}>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-lg font-medium ${PLATFORM_COLORS[offer.platform] ?? "bg-muted text-muted-foreground"}`}>
                       {offer.platform}
                     </span>
                   )}
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded border font-medium ${STATUS_COLORS[offer.status] ?? ""}`}>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-lg border font-medium ${STATUS_COLORS[offer.status] ?? ""}`}>
                     {statusLabel[offer.status] ?? offer.status}
                   </span>
                   {offer.budget && (

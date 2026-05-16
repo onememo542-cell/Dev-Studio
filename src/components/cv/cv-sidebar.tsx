@@ -17,64 +17,60 @@ export function CVSidebar({ cvProfiles, activeCVId, onSelectCV, onNewCV, onDelet
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="p-4 border-b border-border sticky top-0 bg-background/80 backdrop-blur-md z-20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-              <FileText className="size-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold">CV Builder</h3>
-              <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-                {cvProfiles.length} profile{cvProfiles.length !== 1 ? "s" : ""}
-              </p>
-            </div>
+      <div className="px-3 py-2.5 border-b border-border/60 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="size-7 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
+            <FileText className="size-3.5" />
           </div>
-          <button
-            onClick={onNewCV}
-            className="flex items-center gap-1.5 text-[11px] font-medium bg-primary text-primary-foreground px-2.5 py-1.5 rounded-md hover:opacity-90 transition-opacity"
-          >
-            <Plus className="size-3.5" /> New
-          </button>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60">
+            CV Profiles ({cvProfiles.length})
+          </span>
         </div>
+        <button
+          onClick={onNewCV}
+          className="size-7 grid place-items-center rounded-xl hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+          title="New CV"
+        >
+          <Plus className="size-3.5" />
+        </button>
       </div>
 
-      <nav className="overflow-y-auto p-2 space-y-1 scrollbar-thin flex-1">
+      <nav className="overflow-y-auto p-2 space-y-0.5 scrollbar-thin flex-1">
         {cvProfiles.length > 0 ? (
           cvProfiles.map((cv) => (
             <div
               key={cv.id}
-              className={`group relative w-full text-left px-3 py-2.5 rounded-md text-sm transition-all cursor-pointer border ${
+              className={`group relative w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer ${
                 activeCVId === cv.id
-                  ? "bg-primary/10 text-primary border-primary/20 shadow-sm"
-                  : "text-muted-foreground hover:bg-card hover:text-foreground border-transparent"
+                  ? "bg-primary/10 text-primary ring-1 ring-primary/20"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               }`}
               onClick={() => onSelectCV(cv.id)}
             >
               <div className="pr-6">
-                <div className={`truncate leading-snug font-medium ${activeCVId === cv.id ? "text-foreground" : ""}`}>
+                <div className={`truncate leading-snug text-xs font-medium ${activeCVId === cv.id ? "text-foreground" : ""}`}>
                   {cv.title || "Untitled CV"}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`inline-flex items-center text-[10px] px-1.5 py-0.5 rounded border font-medium ${FOCUS_COLORS[cv.focus]}`}>
+                  <span className={`inline-flex items-center text-[9px] px-1.5 py-0.5 rounded-lg border font-medium ${FOCUS_COLORS[cv.focus]}`}>
                     {FOCUS_LABELS[cv.focus]}
                   </span>
-                  <span className="text-[10px] text-muted-foreground opacity-70">
+                  <span className="text-[9px] text-muted-foreground/60">
                     {new Date(cv.updatedAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); setPendingDeleteId(cv.id); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
               >
                 <Trash2 className="size-3.5" />
               </button>
             </div>
           ))
         ) : (
-          <div className="px-3 py-8 text-xs text-muted-foreground border border-dashed border-border rounded-lg text-center flex flex-col items-center gap-2 m-2">
-            <div className="size-8 rounded-full bg-muted/20 flex items-center justify-center">
+          <div className="px-3 py-10 text-xs text-muted-foreground border border-dashed border-border/60 rounded-xl text-center flex flex-col items-center gap-2 m-2">
+            <div className="size-8 rounded-xl bg-muted/30 grid place-items-center">
               <Plus className="size-4 opacity-50" />
             </div>
             No CVs yet — create your first one

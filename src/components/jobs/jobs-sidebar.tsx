@@ -11,6 +11,11 @@ interface Props {
   onAdd: () => void;
 }
 
+const statusLabel: Record<string, string> = {
+  saved: "Saved", applied: "Applied", interview: "Interview",
+  offer: "Offer", rejected: "Rejected",
+};
+
 export function JobsSidebar({ jobs, activeId, onSelect, onAdd }: Props) {
   const { page, setPage, totalPages, paged, total, pageSize } = usePagination(jobs, 20);
   const grouped = JOB_STATUSES.reduce<Record<string, SavedJob[]>>((acc, s) => {
@@ -18,32 +23,24 @@ export function JobsSidebar({ jobs, activeId, onSelect, onAdd }: Props) {
     return acc;
   }, {} as any);
 
-  const statusLabel: Record<string, string> = {
-    saved: "Saved",
-    applied: "Applied",
-    interview: "Interview",
-    offer: "Offer",
-    rejected: "Rejected",
-  };
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="p-3 border-b border-border flex items-center justify-between shrink-0">
-        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
-          Saved Jobs ({jobs.length})
+      <div className="px-3 py-2.5 border-b border-border/60 flex items-center justify-between shrink-0">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60">
+          Jobs ({jobs.length})
         </span>
         <button
           onClick={onAdd}
-          className="size-7 grid place-items-center rounded-md hover:bg-sidebar-accent/60 text-muted-foreground hover:text-foreground transition-colors"
+          className="size-7 grid place-items-center rounded-xl hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
           title="Add job"
         >
           <Plus className="size-3.5" />
         </button>
       </div>
-      <div className="overflow-y-auto p-2 space-y-3">
+      <div className="overflow-y-auto p-2 space-y-3 flex-1">
         {jobs.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 gap-2 text-center px-4">
-            <Briefcase className="size-8 text-muted-foreground/40" />
+            <Briefcase className="size-8 text-muted-foreground/30" />
             <p className="text-xs text-muted-foreground">No jobs tracked yet.</p>
             <p className="text-[10px] text-muted-foreground/60">Browse live jobs or add one manually.</p>
           </div>
@@ -53,7 +50,7 @@ export function JobsSidebar({ jobs, activeId, onSelect, onAdd }: Props) {
           if (!items || items.length === 0) return null;
           return (
             <div key={status}>
-              <p className="px-2 mb-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              <p className="px-2 mb-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60">
                 {statusLabel[status]} ({items.length})
               </p>
               <ul className="space-y-0.5">
@@ -61,10 +58,10 @@ export function JobsSidebar({ jobs, activeId, onSelect, onAdd }: Props) {
                   <li key={job.id}>
                     <button
                       onClick={() => onSelect(job.id)}
-                      className={`w-full text-left px-2.5 py-2 rounded-md transition-colors group ${
+                      className={`w-full text-left px-3 py-2 rounded-xl transition-all ${
                         activeId === job.id
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground ring-1 ring-border"
-                          : "hover:bg-sidebar-accent/40 text-muted-foreground hover:text-foreground"
+                          ? "bg-primary/10 text-primary ring-1 ring-primary/20"
+                          : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       <p className="text-xs font-medium truncate leading-snug">{job.title}</p>
@@ -72,7 +69,7 @@ export function JobsSidebar({ jobs, activeId, onSelect, onAdd }: Props) {
                         <p className="text-[10px] text-muted-foreground truncate mt-0.5">{job.company}</p>
                       )}
                       <div className="flex items-center gap-1.5 mt-1">
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded border font-medium ${STATUS_COLORS[job.status] ?? ""}`}>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-lg border font-medium ${STATUS_COLORS[job.status] ?? ""}`}>
                           {statusLabel[job.status] ?? job.status}
                         </span>
                         {job.platform && (
