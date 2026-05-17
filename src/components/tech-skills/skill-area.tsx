@@ -6,8 +6,6 @@ import {
   GraduationCap,
   Search,
   Plus,
-  ClipboardList,
-  FolderOpen,
   ChevronRight,
 } from "lucide-react";
 import type { SkillAreaData } from "@/types/skills";
@@ -15,24 +13,20 @@ import { OverviewSection } from "./overview-section";
 import { ChecklistSection } from "./checklist-section";
 import { InterviewSection } from "./interview-section";
 import { ResourcesSection } from "./resources-section";
-import { TasksSection } from "./tasks-section";
-import { ProjectsSection } from "./projects-section";
 import { SplitLayout } from "../layout";
 import { TabNav } from "../layout";
 import { cn } from "@/lib/utils";
 
-type SectionId = "overview" | "checklist" | "interview" | "resources" | "tasks" | "projects";
+type SectionId = "overview" | "checklist" | "interview" | "resources";
 
 const SECTIONS: { id: SectionId; label: string; icon: React.ElementType }[] = [
   { id: "overview",  label: "Overview",       icon: BookOpen },
   { id: "checklist", label: "Checklist",       icon: CheckSquare },
   { id: "interview", label: "Interview Q&A",   icon: GraduationCap },
   { id: "resources", label: "Resources",       icon: ExternalLink },
-  { id: "tasks",     label: "Tasks",           icon: ClipboardList },
-  { id: "projects",  label: "Projects",        icon: FolderOpen },
 ];
 
-const ADD_SECTIONS: SectionId[] = ["interview", "tasks", "projects"];
+const ADD_SECTIONS: SectionId[] = ["interview"];
 
 export function SkillArea({
   data,
@@ -68,14 +62,7 @@ export function SkillArea({
     if (canAdd) setAddTrigger((n) => n + 1);
   };
 
-  const addLabel =
-    activeSection === "tasks"
-      ? "Add Task"
-      : activeSection === "projects"
-        ? "Add Project"
-        : activeSection === "interview"
-          ? "Add Q&A"
-          : "Add";
+  const addLabel = activeSection === "interview" ? "Add Q&A" : "Add";
 
   /* ── Sidebar ─────────────────────────────────────────── */
   const sidebar = (
@@ -189,12 +176,6 @@ export function SkillArea({
             )}
             {activeSection === "resources" && (
               <ResourcesSection data={data} subArea={subArea} />
-            )}
-            {activeSection === "tasks" && (
-              <TasksSection data={data} triggerAdd={addTrigger} />
-            )}
-            {activeSection === "projects" && (
-              <ProjectsSection data={data} triggerAdd={addTrigger} />
             )}
           </div>
         </div>

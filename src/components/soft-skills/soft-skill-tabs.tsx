@@ -1,8 +1,6 @@
 import { useSearch } from "@tanstack/react-router";
 import {
   MessageCircle,
-  Mic,
-  Handshake,
   Target,
   Lightbulb,
   Users,
@@ -13,15 +11,13 @@ import {
 import { TabNav } from "@/components/layout";
 
 const TABS = [
-  { id: "communication",  label: "Communication",   icon: MessageCircle },
-  { id: "speaking",       label: "Public Speaking",  icon: Mic },
-  { id: "negotiation",    label: "Negotiation",      icon: Handshake },
-  { id: "leadership",     label: "Leadership",       icon: Target },
-  { id: "problem-solving",label: "Problem Solving",  icon: Lightbulb },
-  { id: "teamwork",       label: "Teamwork",         icon: Users },
-  { id: "time",           label: "Time Management",  icon: Clock },
-  { id: "growth",         label: "Growth Mindset",   icon: Sparkles },
-  { id: "mental-models",  label: "Mental Models",    icon: Brain },
+  { id: "communication",   label: "Communication",   icon: MessageCircle },
+  { id: "leadership",      label: "Leadership",       icon: Target },
+  { id: "problem-solving", label: "Problem Solving",  icon: Lightbulb },
+  { id: "teamwork",        label: "Teamwork",         icon: Users },
+  { id: "time",            label: "Time Management",  icon: Clock },
+  { id: "growth",          label: "Growth Mindset",   icon: Sparkles },
+  { id: "mental-models",   label: "Mental Models",    icon: Brain },
 ] as const;
 
 export function SoftSkillTabs() {
