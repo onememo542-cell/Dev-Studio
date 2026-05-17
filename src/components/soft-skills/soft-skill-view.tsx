@@ -8,11 +8,14 @@ const COMMUNICATION_EXTRA_TABS = [
 ];
 
 const TEAMWORK_EXTRA_TABS = [
-  { id: "conflict",  label: "Conflict Resolution",  icon: Swords },
-  { id: "remote",    label: "Remote Collaboration",  icon: Wifi },
-  { id: "pairing",   label: "Pair Programming",      icon: Terminal },
-  { id: "codereview",label: "Code Review Culture",   icon: GitPullRequest },
-  { id: "agile",     label: "Agile / Scrum",         icon: RefreshCw },
+  { id: "conflict",      label: "Conflict Resolution",  icon: Swords },
+  { id: "remote",        label: "Remote Collaboration",  icon: Wifi },
+  { id: "pairing",       label: "Pair Programming",      icon: Terminal },
+  { id: "codereview",    label: "Code Review Culture",   icon: GitPullRequest },
+  { id: "agile",         label: "Agile / Scrum",         icon: RefreshCw },
+  { id: "time",          label: "Time Management",       icon: Clock },
+  { id: "growth",        label: "Growth Mindset",        icon: Sparkles },
+  { id: "mental-models", label: "Mental Models",         icon: Brain },
 ];
 
 const LEADERSHIP_EXTRA_TABS = [
