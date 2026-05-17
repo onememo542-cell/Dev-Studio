@@ -34,7 +34,6 @@ function TechSkillsPage() {
         <PageHeader
           icon={Code2}
           title="Technical Skills Hub"
-          description="Unified dashboard for engineering excellence and interview preparation."
           className="mb-4"
         />
         <SkillTabs />

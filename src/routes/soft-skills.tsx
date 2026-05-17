@@ -40,7 +40,6 @@ function SoftSkillsPage() {
         <PageHeader
           icon={Heart}
           title="Communication & Soft Skills"
-          description="Master the art of collaboration, leadership, and emotional intelligence."
           className="mb-4"
         />
         <SoftSkillTabs />

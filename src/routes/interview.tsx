@@ -30,7 +30,6 @@ function InterviewPage() {
         <PageHeader
           icon={GraduationCap}
           title="Interview Preparation"
-          description="Master common and advanced interview questions across all engineering domains."
           className="mb-4"
         />
         <TabNav
