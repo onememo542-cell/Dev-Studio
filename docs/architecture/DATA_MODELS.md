@@ -1,190 +1,115 @@
-# 💾 Data Models and Schema Architecture
+# 💾 Database Schema and Data Models
 
 > [!NOTE]
-> Dev Studio defines its database models under `shared/schema/` using Drizzle ORM schemas, which are aggregated and re-exported in `shared/schema.ts`. This document provides a reference of the PostgreSQL table structures, field definitions, indexes, and relations.
+> Dev Studio utilizes Drizzle ORM to define, migrate, and query PostgreSQL tables. The schemas are split into modular files under **`backend/src/domain/schema/`** to optimize maintenance and build performance.
 
 ---
 
-## 🗃️ Core Entity Schemas
+## 📂 Schema File Map
 
-### 🧑‍💻 1. Authentication User (`auth_users`)
-
-Stores user profiles, login credentials, and OAuth tokens.
-
-```typescript
-export const authUsers = pgTable("auth_users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  email: text("email").unique(),
-  passwordHash: text("password_hash"),
-  googleId: text("google_id").unique(),
-  displayName: text("display_name"),
-  avatarUrl: text("avatar_url"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-```
-
-- **Indexes**:
-  - `auth_users_email_idx` on `email`
-  - `auth_users_google_id_idx` on `googleId`
+All database tables are defined in standard Drizzle format inside:
+- `backend/src/domain/schema/auth.ts` — User profiles and verification states.
+- `backend/src/domain/schema/core.ts` — Prompts, agents, templates, components, and snippets.
+- `backend/src/domain/schema/learning.ts` — Interview questions and progress tracking.
 
 ---
 
-### 📝 2. Prompt Template (`prompts`)
+## 👥 Authentication Models
 
-Contains versioned prompts, customizable template variables, and usage analytics.
+### 📍 `auth_users`
+Stores user profile credentials, Google OAuth logins, and validation states.
 
-```typescript
-export const prompts = pgTable("prompts", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  category: text("category"),
-  tags: text("tags").array().default([]),
-  body: text("body").notNull(),
-  variables: text("variables").array().default([]),
-  model: text("model"),
-  favorite: boolean("favorite").default(false),
-  usageCount: integer("usage_count").default(0),
-  versions: jsonb("versions").default([]),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-```
-
-- **Indexes**:
-  - `prompts_user_id_idx` on `userId`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key, Default Random | Unique identifier. |
+| `email` | `text` | Unique, Index | User's email address. |
+| `password_hash` | `text` | Nullable | Encrypted password string. Null for Google OAuth accounts. |
+| `google_id` | `text` | Unique, Nullable | Google OAuth identifier. |
+| `display_name` | `text` | Nullable | Profile name displayed in dashboard views. |
+| `avatar_url` | `text` | Nullable | URL to user's profile image. |
+| `is_verified` | `boolean` | Not Null, Default `false` | Email verification flag. |
+| `verification_token` | `text` | Nullable | Temporary token for email activation. |
+| `verification_token_expires`| `timestamp` | Nullable | Expiry date of active verification token. |
+| `created_at` | `timestamp` | Not Null, Default Now | Creation timestamp. |
+| `updated_at` | `timestamp` | Not Null, Default Now | Last update timestamp. |
+| `deleted_at` | `timestamp` | Nullable | Soft delete timestamp. |
 
 ---
 
-### 🤖 3. AI Agent (`agents`)
+## 🛠️ Core Business Models
 
-Configures autonomous LLM assistants with system prompts, parameters, and tool access list.
+### 📍 `prompts`
+Maintains user prompt libraries, parameter lists, and favorite markers.
 
-```typescript
-export const agents = pgTable("agents", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull(),
-  name: text("name").notNull(),
-  role: text("role"),
-  systemPrompt: text("system_prompt").notNull(),
-  tools: text("tools").array().default([]),
-  model: text("model"),
-  temperature: real("temperature").default(0.7),
-  status: text("status").default("draft"),
-  tags: text("tags").array().default([]),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-```
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key, Default Random | Unique identifier. |
+| `user_id` | `text` | Not Null, Index | ID of the owning user. |
+| `title` | `text` | Not Null | Prompt display title. |
+| `description` | `text` | Nullable | Long description of the prompt. |
+| `body` | `text` | Not Null | The actual prompt template text. |
+| `variables` | `text[]` | Default `[]` | Parsed template variables (e.g. `['topic', 'length']`). |
+| `category` | `text` | Nullable | Categorization label. |
+| `tags` | `text[]` | Default `[]` | Searchable tag labels. |
+| `favorite` | `boolean` | Default `false` | Pin flag. |
+| `usage_count` | `integer` | Default `0` | Number of times consumed. |
+| `versions` | `jsonb` | Default `[]` | Revision log history containing old body states. |
 
-- **Indexes**:
-  - `agents_user_id_idx` on `userId`
+### 📍 `agents`
+Stores system configuration parameters for custom AI Agents.
 
----
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key, Default Random | Unique identifier. |
+| `user_id` | `text` | Not Null, Index | Owning user ID. |
+| `name` | `text` | Not Null | Agent profile name. |
+| `role` | `text` | Nullable | The agent's core role description. |
+| `system_prompt` | `text` | Not Null | Custom instructions injected into system role context. |
+| `tools` | `text[]` | Default `[]` | Enabled integrations or runtime utility handlers. |
+| `model` | `text` | Nullable | Selected AI engine model (e.g. `gpt-4o`, `gpt-3.5-turbo`). |
+| `temperature` | `real` | Default `0.7` | Model response creativity temperature settings. |
+| `status` | `text` | Default `draft` | Active state: `draft`, `active`, or `archived`. |
 
-### 🧩 4. Reusable Code Component (`components`)
+### 📍 `components`
+Stores reusable frontend React code snippets and metadata.
 
-Holds code blocks with pre-defined styles, category filters, and required package dependency tracking.
-
-```typescript
-export const components = pgTable("components", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull(),
-  name: text("name").notNull(),
-  description: text("description"),
-  category: text("category"),
-  tags: text("tags").array().default([]),
-  code: text("code").notNull(),
-  dependencies: text("dependencies").array().default([]),
-  favorite: boolean("favorite").default(false),
-  usageCount: integer("usage_count").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-```
-
-- **Indexes**:
-  - `components_user_id_idx` on `userId`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key, Default Random | Unique identifier. |
+| `user_id` | `text` | Not Null, Index | Owning user ID. |
+| `name` | `text` | Not Null | Component title. |
+| `code` | `text` | Not Null | The source JSX/TSX React code. |
+| `dependencies` | `text[]` | Default `[]` | Required packages to run (e.g., `lucide-react`). |
+| `favorite` | `boolean` | Default `false` | Pin flag. |
 
 ---
 
-### 📦 5. Starter Project Template (`templates`)
+## 🧠 Interview & Learning Prep Models
 
-Describes complete technology stack lists, folder directory layouts, and configuration notes.
+### 📍 `interview_questions`
+Stores interview preparation questions, answers, and depth states.
 
-```typescript
-export const templates = pgTable("templates", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull(),
-  name: text("name").notNull(),
-  description: text("description"),
-  stack: text("stack").array().default([]),
-  tags: text("tags").array().default([]),
-  structure: text("structure"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-```
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key, Default Random | Unique identifier. |
+| `user_id` | `text` | Nullable, Index | ID of the creator. Null for global seed questions. |
+| `question` | `text` | Not Null | The query string. |
+| `answer` | `text` | Not Null | Detailed baseline answer explanation. |
+| `difficulty` | `enum` | Default `mid` | Enum: `junior`, `mid`, `senior`. |
+| `area` | `enum` | Not Null | Category Enum: `frontend`, `backend`, `devops`, `database`. |
+| `answer_depths` | `jsonb` | Default `[]` | Graduated response depths (e.g., summary, detailed, advanced). |
+| `is_global` | `boolean` | Default `false`, Index | Set to `true` for standard system seed questions. |
 
-- **Indexes**:
-  - `templates_user_id_idx` on `userId`
+### 📍 `user_progress`
+Tracks user completion status across prep questions and tech roadmaps.
 
----
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `user_id` | `text` | Not Null | Owning user identifier. |
+| `item_id` | `text` | Not Null | ID of the related item. |
+| `area_id` | `text` | Not Null | Category identifier (for easy aggregation). |
+| `completed` | `boolean` | Default `true` | Progress completion flag. |
+| `updated_at` | `timestamp` | Not Null, Default Now | Update timestamp. |
 
-### 📎 6. Code Snippet (`snippets`)
-
-Organizes smaller, non-component code templates by language and title tags.
-
-```typescript
-export const snippets = pgTable("snippets", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull(),
-  title: text("title").notNull(),
-  language: text("language").notNull(),
-  description: text("description"),
-  code: text("code").notNull(),
-  tags: text("tags").array().default([]),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-```
-
-- **Indexes**:
-  - `snippets_user_id_idx` on `userId`
-
----
-
-### 🧠 7. Interview Q&A Bank (`interview_questions`)
-
-A repository of interview preparation assets containing questions, target answers, difficulties, and tech domains.
-
-```typescript
-export const interviewQuestions = pgTable("interview_questions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id"), // null if global seeded questions
-  question: text("question").notNull(),
-  answer: text("answer").notNull(),
-  difficulty: text("difficulty").default("mid"),
-  domain: text("domain").notNull(),
-  tags: text("tags").array().default([]),
-  isGlobal: boolean("is_global").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-```
-
-- **Indexes**:
-  - `interview_questions_domain_idx` on `domain`
-  - `interview_questions_user_id_idx` on `userId`
-
----
-
-## 📈 Database Best Practices
-
-> [!TIP]
->
-> - **Self-Generating Identifiers**: All main schema tables use PostgreSQL `gen_random_uuid()` to assign strong primary keys automatically at write time.
-> - **Date Handlers**: Database row creations default their `created_at` and `updated_at` timestamps using database-native `NOW()`.
-> - **Automatic Query Indexing**: Every single table is index-optimized on the `user_id` query criteria to guarantee instant lookup speeds even as data tables scale.
+> [!NOTE]
+> The primary key for `user_progress` is composed of `(user_id, item_id)` to prevent double tracking records.

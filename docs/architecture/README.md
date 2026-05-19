@@ -1,110 +1,81 @@
-# 📐 System Architecture Overview
+# 📐 System Architecture
 
 > [!NOTE]
-> Dev Studio is built as a single-page application (SPA) with a lightweight, high-performance Express backend. This document maps out the system components, database schemas, authorization mechanisms, and full request-response data flows.
+> Dev Studio is built around strict separation of concerns, modular dependency flow, and security-first request pipelines. This document details the architectural boundaries between the React frontend and the Clean Architecture backend.
 
 ---
 
 ## 🗺️ System Component Diagram
 
-Below is a architectural mapping of client-server communications, database relations, and API adapters:
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                       Browser / Client                       │
-│  React 19 · TanStack Router (file-based)                     │
-│  TanStack Query (async hooks) · Zustand (persisted state)    │
-│  Tailwind CSS v4 · shadcn/ui framework                       │
-└──────────────┬───────────────────────────────▲───────────────┘
-               │ fetch() / HTTP API            │ server cookies (JWT)
-┌──────────────▼───────────────────────────────┴───────────────┐
-               Express 5 Backend Server (server.ts)
-   - JWT Cookie session verification & validation
-   - Passport-based Google OAuth Integration
-   - API endpoints forwarding requests to OpenAI models
-└──────────────┬───────────────────────────────────────────────┘
-               │ Drizzle ORM queries
-┌──────────────▼───────────────────────────────────────────────┐
-│                 PostgreSQL Database (Local)                  │
-│  auth_users · prompts · agents · components · snippets       │
-│  templates · connectors · social_drafts · mail_templates     │
-│  interview_questions · user_progress · cv_profiles           │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🔐 Authentication Pipeline
-
-Dev Studio implements robust, state-of-the-art authentication utilizing a secure JWT cookie-based session pattern alongside standard OAuth.
-
-### Session Lifecycle
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant Client as React SPA (Frontend)
-    participant Server as Express (server/routes/api/auth.ts)
-    participant DB as PostgreSQL Database
-
-    User->>Client: Input credentials / Click Sign-in
-    Client->>Server: POST /api/auth/login
-    Server->>DB: Query user by email
-    DB-->>Server: Return email and passwordHash
-    Server->>Server: Bcrypt verification match
-    Server->>Server: Generate sub JWT signed with JWT_SECRET
-    Server-->>Client: HTTP 200 OK + Set-Cookie: ds_token (httpOnly, Secure, lax)
-    Client->>Client: Zustand authState: Authenticated
-```
-
-1. **Local Authentication**: Users register with their email and password. Passwords are salted and hashed (12 rounds of bcrypt) and stored in the database.
-2. **Session Identification**: On successful login or registration, the backend signs a JSON Web Token (JWT) with the user ID (`sub` claim) signed with a secure `JWT_SECRET`.
-3. **Cookie Storage**: The JWT is returned via a cookie named `ds_token` configured with security headers:
-   - `httpOnly`: Protects the session token against Cross-Site Scripting (XSS).
-   - `secure`: Transmitted exclusively over encrypted HTTPS requests (enabled in production).
-   - `sameSite: lax`: Guards against Cross-Site Request Forgery (CSRF).
-4. **Google OAuth 2.0**: Users can authenticate using Google login if client keys are set. On successful authentication, the server signs a JWT and redirects the user back to the application.
-
----
-
-## 🔄 Dynamic Data Flow Pattern
-
-Dev Studio employs a hybrid optimistic state management architecture where Zustand handles instantaneous frontend state transitions, synchronizing updates to PostgreSQL in the background.
+The interaction model below outlines how requests move from client UI interactions, through middlewares, controllers, and services, down to the database persistence layer.
 
 ```mermaid
 graph TD
-    A[User action in Client UI] -->|1. React handler triggers action| B(Zustand State Store)
-    B -->|2. Instantaneous local update| C[Client View Updates]
-    B -->|3. Background asynchronous dispatch| D[REST API client calls /api/*]
-    D -->|4. Express router maps request| E[Backend API handler]
-    E -->|5. RequireUser JWT verification| F[Drizzle ORM execution]
-    F -->|6. Pushed to Postgres| G[(PostgreSQL DB)]
-    F -->|7. Database returns row| H[HTTP Response returned]
-    H -->|8. Zustand reconciles response| B
+    subgraph Frontend [React SPA]
+        UI[React Components] --> Store[Zustand Stores]
+        Store --> API[Fetch / API Connectors]
+    end
+
+    subgraph Backend [Express 5 Server]
+        API --> Routes[presentation/routes.ts]
+        Routes --> Mid[presentation/middleware/auth.ts]
+        Mid --> Control[presentation/controllers/]
+        Control --> Service[application/services/]
+        Service --> Schema[domain/schema/]
+        Service --> DB[infrastructure/database/]
+    end
+
+    DB --> PG[(PostgreSQL)]
 ```
 
 ---
 
-## 💻 Tech Stack Properties
+## 🏗️ Backend Design: Clean Architecture
 
-| Domain                 | Technology      | Key Benefits                                                                  |
-| ---------------------- | --------------- | ----------------------------------------------------------------------------- |
-| **Frontend Framework** | React 19        | High-performance component scheduling, stable functional hooks.               |
-| **State Store**        | Zustand         | Absolute control of state hydration, unified actions layer, zero boilerplate. |
-| **Routing Manager**    | TanStack Router | End-to-end type safety of page paths and query parameters.                    |
-| **Data Fetching**      | TanStack Query  | Automatic polling, request caching, and automated revalidation.               |
-| **Styling Engine**     | Tailwind CSS v4 | CSS-first configuration, theme token generation, utility speed.               |
-| **Server Engine**      | Express 5       | Light overhead, asynchronous request support, middleware chain.               |
-| **Database Connector** | Drizzle ORM     | Standard SQL querying, compiler checks, zero latency.                         |
-| **Database Backend**   | PostgreSQL      | Enterprise-grade reliability, foreign keys, query optimization.               |
+The backend code inside the `backend/src/` folder is separated into four layers following Clean Architecture principles. Dependencies always point inward:
+
+### 1. 📂 Domain (`backend/src/domain/`)
+- **Entities & Schemas**: Defines database tables using Drizzle ORM (under `domain/schema/`).
+- **Enums & Constants**: Project-wide business enums (e.g., `AgentStatus`, `QuestionArea`).
+- **Interfaces**: Contracts that describe data access operations or external services.
+- *Has zero external dependencies on framework packages.*
+
+### 2. 📂 Application (`backend/src/application/`)
+- **Services**: Classes executing business logic and core features (e.g., computing progress scores, handling AI prompt calls).
+- **Use Cases**: Specific orchestrations of domain structures and interfaces.
+
+### 3. 📂 Infrastructure (`backend/src/infrastructure/`)
+- **Database Connection**: Configures the PostgreSQL connection pool using Drizzle.
+- **Seeds & Migrations**: Handles populating development tables with default data.
+- **External Adapters**: Connectors to third-party services like OpenAI API or Slack webhook clients.
+
+### 4. 📂 Presentation (`backend/src/presentation/`)
+- **Controllers**: Receives HTTP requests, validates arguments, invokes application services, and returns HTTP responses.
+- **Routes**: Directs HTTP endpoints to controllers.
+- **Middleware**: Custom security filters (JWT verification, rate limiters, error catch-all routes).
 
 ---
 
-## 📂 Core Architecture Files
+## 🎨 Frontend Design: Single Page Application
 
-- `server.ts` — Express engine bootstrapper, static SPA path resolvers, and hot module reloading middleware.
-- `server/routes.ts` — Registering API routing namespaces.
-- `server/middleware/auth.ts` — Verifying and verifying JWT cookie validity on endpoints.
-- `server/db/index.ts` — Database connector configuring pool size.
-- `shared/schema.ts` — Aggregated exports for all Drizzle model schema declarations.
-- `src/lib/store.ts` — State-of-the-art Zustand store encapsulating all state and API action logic.
+The frontend inside the `frontend/` folder operates as a modern client-side React SPA:
+
+- **State Management (Zustand)**: Client-side state is handled in stores (under `frontend/src/lib/store/`). Features like active sessions, prompt favorites, and UI dark/light modes sync with `localStorage` automatically.
+- **Routing (TanStack Router)**: Type-safe client-side routing. Route setups are organized under `frontend/src/routes/` with automated layout wrappers and authorization checks.
+- **Styling (Tailwind CSS v4)**: Atomic utility styling. Custom theme presets and variables are defined in `frontend/src/index.css`.
+- **UI Components**: Uses atomic, accessible shadcn/ui structures with custom styling overlays.
+
+---
+
+## ⚡ Core Architecture Files Reference
+
+Use the table below to locate the foundational files in the codebase:
+
+| Path | Purpose |
+| :--- | :--- |
+| **[backend/src/index.ts](file:///c:/Users/Memo/Downloads/Dev%20Studio/Dev-Studio/backend/src/index.ts)** | The Express server entry point. Configures CORS, security headers, cookie parser, and starts listening. |
+| **[backend/src/presentation/routes.ts](file:///c:/Users/Memo/Downloads/Dev%20Studio/Dev-Studio/backend/src/presentation/routes.ts)** | Core API route registration. Standardizes sub-routes (auth, interview prep, agents, prompts, snippets, templates). |
+| **[backend/src/presentation/middleware/auth.ts](file:///c:/Users/Memo/Downloads/Dev%20Studio/Dev-Studio/backend/src/presentation/middleware/auth.ts)** | Session extraction and signature verification from the signed JWT cookie (`ds_token`). |
+| **[backend/src/domain/schema.ts](file:///c:/Users/Memo/Downloads/Dev%20Studio/Dev-Studio/backend/src/domain/schema.ts)** | Aggregates all tables from modular schema files into a unified export for Drizzle ORM. |
+| **[frontend/src/main.tsx](file:///c:/Users/Memo/Downloads/Dev%20Studio/Dev-Studio/frontend/src/main.tsx)** | Renders the React root element, mounts the TanStack Router provider, and registers TanStack Query client context. |
+| **[frontend/src/lib/store/useAuthStore.ts](file:///c:/Users/Memo/Downloads/Dev%20Studio/Dev-Studio/frontend/src/lib/store/useAuthStore.ts)** | Zustand client store managing active user profile info, loading states, and auth checks. |

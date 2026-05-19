@@ -15,13 +15,17 @@ If you do not have Postgres installed:
 
 1. Download and install PostgreSQL from the [official website](https://www.postgresql.org/download/).
 2. Create a database named `dev_studio_db`.
-3. Set your connection string in your local `.env` file under the key `DATABASE_URL`:
+3. Set your connection string in your **`backend/.env`** file under the key `DATABASE_URL`:
    ```ini
    DATABASE_URL=postgresql://postgres:your_db_password@localhost:5432/dev_studio_db
    ```
-4. Synchronize the schema by running:
+4. Synchronize the schema and initialize seeding:
    ```bash
-   npm run db:push
+   # Push tables to postgres database
+   npm run db:push --prefix backend
+
+   # Run database seed
+   npm run db:seed --prefix backend
    ```
 
 ---
@@ -51,7 +55,7 @@ To enable modern social sign-in:
    ```
    http://localhost:5000/api/auth/google/callback
    ```
-8. Copy the generated **Client ID** and **Client Secret** into your `.env` file:
+8. Copy the generated **Client ID** and **Client Secret** into your **`backend/.env`** file:
    ```ini
    GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
    GOOGLE_CLIENT_SECRET=your_client_secret_here
@@ -70,7 +74,7 @@ To enable server-side automated message updates into your Slack channels:
 4. Scroll to the bottom and click **Add New Webhook to Workspace**.
 5. Choose the channel you want the notifications to post to, and click **Authorize**.
 6. Copy the generated webhook URL (starts with `https://hooks.slack.com/services/...`).
-7. Add the webhook URL to your local `.env` file:
+7. Add the webhook URL to your **`backend/.env`** file:
    ```ini
    SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
    ```

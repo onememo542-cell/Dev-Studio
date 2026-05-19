@@ -7,7 +7,7 @@
 
 ## 📂 The `.env` Configuration File
 
-To set environment variables locally, create a file named `.env` in the root of the project. A template of standard settings is provided below:
+To set environment variables locally, create a file named `.env` inside the **`backend/`** directory. A template of standard settings is provided below:
 
 ```ini
 # Server Configuration
@@ -16,14 +16,14 @@ NODE_ENV=development
 JWT_SECRET=super_secure_unpredictable_key_here
 
 # Database Configuration
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dev_studio
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dev_studio_db
 
 # Artificial Intelligence (AI)
 OPENAI_API_KEY=sk-proj-...
 
 # Optional: Google OAuth
-GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your_client_secret_here
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 
 # Optional: Slack Webhook Integration
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
@@ -34,17 +34,17 @@ SLACK_SIGNING_SECRET=your_slack_signing_secret_here
 
 ## 📋 Comprehensive Variable Reference
 
-| Variable               | Required   | Default       | Description                                                                                                                |
-| ---------------------- | ---------- | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `PORT`                 | 🟡 No      | `5000`        | The port that the local Express server listens on.                                                                         |
-| `NODE_ENV`             | 🟡 No      | `development` | The environment setting. Set to `production` in production deployment.                                                     |
-| `JWT_SECRET`           | 🟢 **Yes** | —             | A unique, secret string used to sign JWT cookies for user authentication sessions. Keep this secret!                       |
-| `DATABASE_URL`         | 🟢 **Yes** | —             | The full connection string for your local or remote PostgreSQL database. Format: `postgresql://user:pass@host:port/dbname` |
-| `OPENAI_API_KEY`       | 🟡 No      | —             | Required for AI generation features. This is used by the Prompt Generator, CV Parser, AI Roadmaps, and local AI Chat bots. |
-| `GOOGLE_CLIENT_ID`     | 🟡 No      | —             | Client ID from the Google Cloud Console. Enables "Sign in with Google" OAuth.                                              |
-| `GOOGLE_CLIENT_SECRET` | 🟡 No      | —             | Client Secret from the Google Cloud Console. Required for Google OAuth.                                                    |
-| `SLACK_WEBHOOK_URL`    | 🟡 No      | —             | Enables the system to send automated logs or notification messages into a Slack channel.                                   |
-| `SLACK_SIGNING_SECRET` | 🟡 No      | —             | Signature validation key from your Slack App dashboard to verify incoming hooks.                                           |
+| Variable | Required | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `PORT` | 🟡 No | `5000` | The port that the local Express server listens on. |
+| `NODE_ENV` | 🟡 No | `development` | The environment setting. Set to `production` in production deployment. |
+| `JWT_SECRET` | 🟢 **Yes** | — | A unique, secret string used to sign JWT cookies for user authentication sessions. Keep this secret! |
+| `DATABASE_URL` | 🟢 **Yes** | — | The full connection string for your local or remote PostgreSQL database. Format: `postgresql://user:pass@host:port/dbname` |
+| `OPENAI_API_KEY` | 🟡 No | — | Required for AI generation features. This is used by the Prompt Generator, CV Parser, AI Roadmaps, and local AI Chat bots. |
+| `GOOGLE_CLIENT_ID` | 🟡 No | — | Client ID from the Google Cloud Console. Enables "Sign in with Google" OAuth. |
+| `GOOGLE_CLIENT_SECRET` | 🟡 No | — | Client Secret from the Google Cloud Console. Required for Google OAuth. |
+| `SLACK_WEBHOOK_URL` | 🟡 No | — | Enables the system to send automated logs or notification messages into a Slack channel. |
+| `SLACK_SIGNING_SECRET` | 🟡 No | — | Signature validation key from your Slack App dashboard to verify incoming hooks. |
 
 ---
 

@@ -51,17 +51,24 @@ chore: upgrade package dependencies
 
 ## 🔍 Pre-commit Validation
 
-Before pushing branches or opening a Pull Request, you must run the following validation scripts in your terminal. All tests must pass:
+Before pushing branches or opening a Pull Request, run the validation scripts for both workspaces. All checks must pass:
 
 ```bash
-# 1. Run the code syntax linter
-npm run lint
+# 1. Run codebase linting
+npm run lint:frontend
+npm run lint:backend
 
-# 2. Check strict type safety compiling
-npx tsc --noEmit
+# 2. Format code styling
+npm run format:frontend
+npm run format:backend
 
-# 3. Verify production compilation succeeds
-npm run build
+# 3. Verify production compilation
+npm run build:frontend
+npm run build:backend
+
+# 4. Run automated tests
+npm run test:frontend
+npm run test:backend
 ```
 
 ---
@@ -70,8 +77,8 @@ npm run build
 
 When opening a Pull Request, check off the following requirements:
 
-- [ ] All linting checks pass successfully (`npm run lint`).
-- [ ] Strictly compiling TypeScript without errors (`npx tsc --noEmit`).
-- [ ] Production build succeeds cleanly (`npm run build`).
+- [ ] All linting checks pass successfully (`npm run lint:frontend` and `npm run lint:backend`).
+- [ ] Strictly compiling TypeScript without errors.
+- [ ] Production build succeeds cleanly (`npm run build:frontend` and `npm run build:backend`).
 - [ ] The change does not introduce unrelated logic or file edits.
 - [ ] Relevant documentation has been updated to reflect the change.
