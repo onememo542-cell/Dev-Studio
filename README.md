@@ -82,6 +82,36 @@ Open your browser and navigate to **[http://localhost:5173](http://localhost:517
 
 ---
 
+## 🐋 Running with Docker Compose (Containerized Development)
+
+You can launch the entire stack—including the React frontend, Express backend, and PostgreSQL database—with a single command:
+
+```bash
+# Start all services (db, backend, frontend) in the background
+docker compose up --build -d
+```
+
+Once built and running:
+- **Frontend client** is available at: **[http://localhost:5173](http://localhost:5173)**
+- **Backend API server** is available at: **[http://localhost:5000](http://localhost:5000)**
+- **PostgreSQL Database** is running on: `localhost:5432`
+
+To run database migrations and seed default prep resources within the container environment:
+```bash
+# Push tables to the Postgres container
+docker compose exec backend npm run db:push
+
+# Run seed scripts
+docker compose exec backend npm run db:seed
+```
+
+To stop the containers:
+```bash
+docker compose down
+```
+
+---
+
 ## 📂 Monorepo Organization
 
 The project is structured to keep application concerns clean and separated:
