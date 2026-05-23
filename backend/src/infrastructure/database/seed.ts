@@ -3,6 +3,10 @@ import { count as countFn } from "drizzle-orm";
 import { interviewQuestions } from "../../domain/schema/learning.js";
 import { prompts, agents, components, snippets, templates } from "../../domain/schema/core.js";
 import { connectors, socialDrafts, mailTemplates } from "../../domain/schema/integrations.js";
+import { cvProfiles } from "../../domain/schema/cv.js";
+import { savedJobs, freelanceOffers, myServices } from "../../domain/schema/career.js";
+import { plannerTasks } from "../../domain/schema/planner.js";
+import { conversations, messages } from "../../domain/schema/chat.js";
 
 import { seedInterviewQuestions } from "./seeds/interview-questions.js";
 import { defaultQuestions, suggestedQuestions } from "./seeds/behavioral.js";
@@ -14,6 +18,12 @@ import { seedTemplates } from "./seeds/templates.js";
 import { seedConnectors } from "./seeds/connectors.js";
 import { seedSocialDrafts } from "./seeds/social-drafts.js";
 import { seedMailTemplates } from "./seeds/mail-templates.js";
+import { seedCvProfiles } from "./seeds/cv.js";
+import { seedJobs } from "./seeds/jobs.js";
+import { seedFreelanceOffers } from "./seeds/freelance-offers.js";
+import { seedMyServices } from "./seeds/my-services.js";
+import { seedPlannerTasks } from "./seeds/planner-tasks.js";
+import { seedConversations, seedMessagesForConversations } from "./seeds/conversations.js";
 
 async function seedGlobalInterviewQuestions() {
   const existing = await db
@@ -82,6 +92,77 @@ async function seedTableIfNeeded(table: any, data: any[], name: string) {
   console.log(`Seeded ${rows.length} rows into ${name}.`);
 }
 
+/**
+ * Seeds planner tasks (no fixed id — uses auto-generated UUID).
+ * Tasks are user-scoped and date-bound. Dates are generated relative to today.
+ */
+async function seedPlannerIfNeeded() {
+  const [row] = await db.select({ n: countFn() }).from(plannerTasks);
+  const existing = Number(row?.n ?? 0);
+
+  if (existing >= seedPlannerTasks.length) {
+    console.log(`plannerTasks already seeded (${existing} rows) — skipping.`);
+    return;
+  }
+
+  console.log(`plannerTasks: found ${existing} rows, seeding ${seedPlannerTasks.length} tasks…`);
+
+  const rows = seedPlannerTasks.map((t) => ({
+    userId: "local",
+    date: t.date,
+    title: t.title,
+    description: t.description,
+    priority: t.priority as any,
+    status: t.status as any,
+    category: t.category as any,
+    order: t.order,
+    estimatedMinutes: t.estimatedMinutes,
+    tags: t.tags,
+    slug: "",
+  }));
+
+  await db.insert(plannerTasks).values(rows);
+  console.log(`Seeded ${rows.length} planner tasks.`);
+}
+
+/**
+ * Seeds conversations + messages.
+ * conversations has serial PK (no userId) — special handling needed.
+ */
+async function seedConversationsIfNeeded() {
+  const [row] = await db.select({ n: countFn() }).from(conversations);
+  const existing = Number(row?.n ?? 0);
+
+  if (existing >= seedConversations.length) {
+    console.log(`conversations already seeded (${existing} rows) — skipping.`);
+    return;
+  }
+
+  console.log(`conversations: seeding ${seedConversations.length} conversations with messages…`);
+
+  for (let i = 0; i < seedConversations.length; i++) {
+    const [conv] = await db
+      .insert(conversations)
+      .values({ title: seedConversations[i].title })
+      .returning({ id: conversations.id });
+
+    if (!conv) continue;
+
+    const msgs = seedMessagesForConversations
+      .filter((m) => m.conversationIndex === i)
+      .map(({ conversationIndex: _ci, ...rest }) => ({
+        ...rest,
+        conversationId: conv.id,
+      }));
+
+    if (msgs.length > 0) {
+      await db.insert(messages).values(msgs);
+    }
+  }
+
+  console.log(`Seeded ${seedConversations.length} conversations with messages.`);
+}
+
 export async function runSeeding() {
   // 1. Seed global interview questions
   await seedGlobalInterviewQuestions();
@@ -97,6 +178,20 @@ export async function runSeeding() {
   await seedTableIfNeeded(connectors, seedConnectors, "connectors");
   await seedTableIfNeeded(socialDrafts, seedSocialDrafts, "socialDrafts");
   await seedTableIfNeeded(mailTemplates, seedMailTemplates, "mailTemplates");
+
+  // 4. Seed CV profiles
+  await seedTableIfNeeded(cvProfiles, seedCvProfiles, "cvProfiles");
+
+  // 5. Seed career / freelance data
+  await seedTableIfNeeded(savedJobs, seedJobs, "savedJobs");
+  await seedTableIfNeeded(freelanceOffers, seedFreelanceOffers, "freelanceOffers");
+  await seedTableIfNeeded(myServices, seedMyServices, "myServices");
+
+  // 6. Seed planner tasks (date-relative, no fixed id)
+  await seedPlannerIfNeeded();
+
+  // 7. Seed AI conversations + messages
+  await seedConversationsIfNeeded();
 }
 
 async function main() {
