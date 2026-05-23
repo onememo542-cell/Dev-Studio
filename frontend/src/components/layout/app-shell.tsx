@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { CommandPalette } from "./command-palette";
 import { ErrorBoundary } from "./error-boundary";
+import { PresenceIndicator } from "./presence-indicator";
 import { UserMenu } from "@/features/auth/user-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -450,6 +451,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Right: actions */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Presence indicator */}
+            <TooltipProvider delayDuration={0}>
+              <PresenceIndicator userId={user?.id} />
+            </TooltipProvider>
+
             {/* Theme toggle */}
             <TooltipProvider delayDuration={0}>
               <Tooltip>

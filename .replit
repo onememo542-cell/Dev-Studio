@@ -39,7 +39,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev --prefix frontend"
+args = "cd frontend && ./node_modules/.bin/vite"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -51,7 +51,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev:backend"
+args = "cd backend && ./node_modules/.bin/nodemon"
 waitForPort = 3001
 
 [[ports]]

@@ -1,7 +1,9 @@
+import { createServer } from "http";
 import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import "dotenv/config";
+import { attachPresenceWS } from "./presentation/ws/presence.handler.js";
 import {
   corsOptions,
   helmetOptions,
@@ -81,7 +83,10 @@ async function startServer() {
 
   // Only start the listener if we're not running on Vercel
   if (!process.env.VERCEL) {
-    app.listen(PORT, "0.0.0.0", () => {
+    const httpServer = createServer(app);
+    attachPresenceWS(httpServer);
+
+    httpServer.listen(PORT, "0.0.0.0", () => {
       logger.info(`Dev Studio running on port ${PORT}`, { port: PORT, env: process.env.NODE_ENV ?? "development" });
     });
   }
