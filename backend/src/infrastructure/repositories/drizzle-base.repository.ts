@@ -1,4 +1,4 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, or } from "drizzle-orm";
 import { IRepository } from "../../domain/repositories/base.repository.js";
 
 export class DrizzleBaseRepository<
@@ -49,7 +49,11 @@ export class DrizzleBaseRepository<
     if (!("userId" in this.table)) {
       throw new Error("Table does not have a userId column");
     }
-    const whereClause = this.applySoftDelete(eq((this.table as any).userId, userId));
+    const userFilter = or(
+      eq((this.table as any).userId, userId),
+      eq((this.table as any).userId, "local"),
+    );
+    const whereClause = this.applySoftDelete(userFilter);
     return await this.dbClient
       .select()
       .from(this.table)
