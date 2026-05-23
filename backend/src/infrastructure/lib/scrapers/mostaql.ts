@@ -10,90 +10,67 @@ export async function scrapeMostaql(query: string, days: number): Promise<any[]>
     },
     signal: AbortSignal.timeout(12000),
   });
-  if (!r.ok) throw new Error(`Mostaql ${r.status}`);
-  const html = await r.text();
 
+  if (r.status === 403 || r.status === 429 || r.status === 503 || r.status === 401) {
+    console.warn(`[mostaql] Blocked (${r.status}) — returning empty`);
+    return [];
+  }
+  if (!r.ok) throw new Error(`Mostaql ${r.status}`);
+
+  const html = await r.text();
   const cutoff = Date.now() - days * 86400000;
   const jobs: any[] = [];
 
-  const rowRe =
-    /<tr[^>]*class="[^"]*project[^"]*"[^>]*id="project-(\d+)"[^>]*>([\s\S]*?)<\/tr>/gi;
+  const rowRe = /<tr class="project-row">([\s\S]*?)<\/tr>/gi;
   let m: RegExpExecArray | null;
 
-  while ((m = rowRe.exec(html)) !== null && jobs.length < 20) {
-    const id = m[1];
-    const block = m[2];
+  while ((m = rowRe.exec(html)) !== null) {
+    const block = m[1];
 
     const titleM = block.match(
-      /<h3[^>]*class="[^"]*project__title[^"]*"[^>]*>[\s\S]*?<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/i,
+      /<h2[^>]*>[\s\S]*?<a\s+href="(https:\/\/mostaql\.com\/project\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/i,
     );
-    if (!titleM) {
-      const altTitle = block.match(/<a[^>]+href="(\/projects\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/i);
-      if (!altTitle) continue;
-      const title = altTitle[2].replace(/<[^>]+>/g, "").trim();
-      const href = altTitle[1];
-      if (!title) continue;
-      const dateM = block.match(/datetime="([^"]+)"/i);
-      const postedAt = dateM ? new Date(dateM[1]).toISOString() : new Date().toISOString();
-      if (dateM && new Date(dateM[1]).getTime() < cutoff) continue;
-      jobs.push({
-        id: `mostaql_${id}`,
-        title,
-        company: "Client",
-        location: "Remote · Arab World",
-        url: `https://mostaql.com${href}`,
-        source: "mostaql",
-        postedAt,
-        tags: extractTags(block),
-        salary: extractBudget(block),
-      });
-      continue;
-    }
+    if (!titleM) continue;
 
+    const url_ = titleM[1];
     const title = titleM[2].replace(/<[^>]+>/g, "").trim();
-    const href = titleM[1];
+    if (!title) continue;
+
     const dateM = block.match(/datetime="([^"]+)"/i);
     const postedAt = dateM ? new Date(dateM[1]).toISOString() : new Date().toISOString();
     if (dateM && new Date(dateM[1]).getTime() < cutoff) continue;
 
+    const clientM = block.match(/<bdi>([^<]+)<\/bdi>/i);
+    const client = clientM?.[1]?.trim() ?? "Client";
+
+    const briefM = block.match(/<p[^>]+class="[^"]*project__brief[^"]*"[^>]*>([\s\S]*?)<\/p>/i);
+    const brief = briefM
+      ? briefM[1].replace(/<[^>]+>/g, "").trim().slice(0, 200)
+      : "";
+
+    const idM = url_.match(/\/project\/(\d+)/);
+    const id = idM ? `mostaql_${idM[1]}` : `mostaql_${Buffer.from(url_).toString("base64").slice(0, 12)}`;
+
     jobs.push({
-      id: `mostaql_${id}`,
+      id,
       title,
-      company: "Client",
+      company: client,
       location: "Remote · Arab World",
-      url: href.startsWith("http") ? href : `https://mostaql.com${href}`,
+      url: url_,
       source: "mostaql",
       postedAt,
-      tags: extractTags(block),
+      tags: extractSkills(block),
       salary: extractBudget(block),
+      description: brief,
     });
-  }
 
-  if (jobs.length === 0) {
-    const altRows = [...html.matchAll(/<a[^>]+href="(\/projects\/[^"?]+)"[^>]*>([^<]{5,120})<\/a>/gi)];
-    for (const row of altRows.slice(0, 15)) {
-      const href = row[1];
-      const title = row[2].trim();
-      if (!title || title.length < 5) continue;
-      const slug = href.split("/").filter(Boolean).pop() ?? "";
-      jobs.push({
-        id: `mostaql_${slug}`,
-        title,
-        company: "Client",
-        location: "Remote · Arab World",
-        url: `https://mostaql.com${href}`,
-        source: "mostaql",
-        postedAt: new Date().toISOString(),
-        tags: [],
-        salary: "",
-      });
-    }
+    if (jobs.length >= 20) break;
   }
 
   return jobs;
 }
 
-function extractTags(block: string): string[] {
+function extractSkills(block: string): string[] {
   const tags: string[] = [];
   const re = /<a[^>]+class="[^"]*skill[^"]*"[^>]*>([^<]+)<\/a>/gi;
   let m: RegExpExecArray | null;
@@ -104,8 +81,8 @@ function extractTags(block: string): string[] {
 function extractBudget(block: string): string {
   const m =
     block.match(/class="[^"]*budget[^"]*"[^>]*>([\s\S]*?)<\/[a-z]+>/i) ??
-    block.match(/(\d[\d,]+)\s*[-–]\s*(\d[\d,]+)\s*\$/) ??
-    block.match(/\$\s*(\d[\d,]+)/);
+    block.match(/(\d[\d,.]+)\s*[-–]\s*(\d[\d,.]+)\s*(?:\$|SAR|ريال)/i) ??
+    block.match(/\$\s*(\d[\d,.]+)/i);
   if (!m) return "";
   return m[1]?.replace(/<[^>]+>/g, "").trim() ?? "";
 }

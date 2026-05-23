@@ -11,6 +11,7 @@ interface Props {
   onSave: (job: Partial<SavedJob>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onSaveRemote: (job: Partial<SavedJob>) => Promise<void>;
+  onSaveOffer?: (job: any) => Promise<void>;
   onBack: () => void;
 }
 
@@ -27,7 +28,7 @@ const EMPTY: Partial<SavedJob> = {
   notes: "",
 };
 
-export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onBack }: Props) {
+export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onSaveOffer, onBack }: Props) {
   const [form, setForm] = useState<Partial<SavedJob>>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -44,7 +45,7 @@ export function JobEditor({ job, isNew, onSave, onDelete, onSaveRemote, onBack }
   }, [job, isNew]);
 
   if (!job && !isNew) {
-    return <JobBrowser onSaveJob={onSaveRemote} />;
+    return <JobBrowser onSaveJob={onSaveRemote} onSaveOffer={onSaveOffer} />;
   }
 
   const handleSave = async () => {

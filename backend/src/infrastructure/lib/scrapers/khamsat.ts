@@ -10,67 +10,60 @@ export async function scrapeKhamsat(query: string, days: number): Promise<any[]>
     },
     signal: AbortSignal.timeout(12000),
   });
-  if (!r.ok) throw new Error(`Khamsat ${r.status}`);
-  const html = await r.text();
 
+  if (r.status === 403 || r.status === 429 || r.status === 503 || r.status === 401) {
+    console.warn(`[khamsat] Blocked (${r.status}) — returning empty`);
+    return [];
+  }
+  if (!r.ok) throw new Error(`Khamsat ${r.status}`);
+
+  const html = await r.text();
   const cutoff = Date.now() - days * 86400000;
   const jobs: any[] = [];
+  const seen = new Set<string>();
 
-  const cardRe =
-    /<div[^>]+class="[^"]*request[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?=<div[^>]+class="[^"]*request|$)/gi;
+  const linkRe = /<a[^>]+href="(\/community\/requests\/[^"?#]+)"[^>]*>([\s\S]*?)<\/a>/gi;
   let m: RegExpExecArray | null;
 
-  while ((m = cardRe.exec(html)) !== null && jobs.length < 20) {
-    const block = m[1];
-    const titleM = block.match(/<a[^>]+href="(\/community\/requests\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/i);
-    if (!titleM) continue;
-    const title = titleM[2].replace(/<[^>]+>/g, "").trim();
-    const href = titleM[1];
-    if (!title || title.length < 5) continue;
+  while ((m = linkRe.exec(html)) !== null) {
+    const href = m[1];
+    const rawTitle = m[2].replace(/<[^>]+>/g, "").trim();
+    if (!rawTitle || rawTitle.length < 5) continue;
+    if (seen.has(href)) continue;
 
-    const dateM = block.match(/datetime="([^"]+)"/i);
+    const slug = href.split("/").filter(Boolean).pop() ?? "";
+    const id = `khamsat_${slug}`;
+    if (seen.has(id)) continue;
+    seen.add(href);
+    seen.add(id);
+
+    const blockStart = html.indexOf(href);
+    const blockSnippet = blockStart >= 0 ? html.slice(Math.max(0, blockStart - 200), blockStart + 800) : "";
+
+    const dateM = blockSnippet.match(/datetime="([^"]+)"/i);
     const postedAt = dateM ? new Date(dateM[1]).toISOString() : new Date().toISOString();
     if (dateM && new Date(dateM[1]).getTime() < cutoff) continue;
 
-    const budgetM = block.match(/(\d[\d,]+)\s*ريال|(\d[\d,]+)\s*\$/i);
+    const budgetM = blockSnippet.match(/(\d[\d,.]+)\s*(?:ريال|SAR|\$)/i);
     const salary = budgetM
-      ? `${(budgetM[1] ?? budgetM[2]).replace(/,/g, "")} ${budgetM[1] ? "SAR" : "USD"}`
+      ? `${budgetM[1].replace(/,/g, "")} ${budgetM[0].includes("$") ? "USD" : "SAR"}`
       : "";
 
+    const tags = extractKhamsatTags(blockSnippet);
+
     jobs.push({
-      id: `khamsat_${href.split("/").filter(Boolean).pop() ?? Math.random().toString(36).slice(2)}`,
-      title,
+      id,
+      title: rawTitle,
       company: "Client",
       location: "Remote · Arab World",
       url: `https://khamsat.com${href}`,
       source: "khamsat",
       postedAt,
-      tags: extractKhamsatTags(block),
+      tags,
       salary,
     });
-  }
 
-  if (jobs.length === 0) {
-    const links = [
-      ...html.matchAll(/<a[^>]+href="(\/community\/requests\/[^"?]+)"[^>]*>([\s\S]*?)<\/a>/gi),
-    ];
-    for (const lm of links.slice(0, 15)) {
-      const href = lm[1];
-      const title = lm[2].replace(/<[^>]+>/g, "").trim();
-      if (!title || title.length < 5) continue;
-      const slug = href.split("/").filter(Boolean).pop() ?? "";
-      jobs.push({
-        id: `khamsat_${slug}`,
-        title,
-        company: "Client",
-        location: "Remote · Arab World",
-        url: `https://khamsat.com${href}`,
-        source: "khamsat",
-        postedAt: new Date().toISOString(),
-        tags: [],
-        salary: "",
-      });
-    }
+    if (jobs.length >= 20) break;
   }
 
   return jobs;
@@ -80,6 +73,9 @@ function extractKhamsatTags(block: string): string[] {
   const tags: string[] = [];
   const re = /<span[^>]+class="[^"]*tag[^"]*"[^>]*>([^<]+)<\/span>/gi;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(block)) !== null) tags.push(m[1].trim());
+  while ((m = re.exec(block)) !== null) {
+    const t = m[1].trim();
+    if (t) tags.push(t);
+  }
   return tags.slice(0, 6);
 }
