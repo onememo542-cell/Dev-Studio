@@ -7,17 +7,12 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useForge } from "@/lib/store";
 import { updateProfile } from "@/lib/api/profile";
+import type { UserProfile } from "@/types/common";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Dev Studio" }] }),
   component: ProfilePage,
 });
-
-interface UserProfile {
-  displayName: string;
-  avatarUrl: string;
-  location: string;
-}
 
 function ProfilePage() {
   const { user, profile: authProfile, refreshProfile } = useAuth();
@@ -83,7 +78,7 @@ function ProfilePage() {
               <p className="text-[10px] text-muted-foreground mb-1">Your public name</p>
               <input
                 type="text"
-                value={form.displayName}
+                value={form.displayName ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, displayName: e.target.value }))}
                 placeholder={user?.name ?? "Enter display name…"}
                 className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
@@ -96,7 +91,7 @@ function ProfilePage() {
               </label>
               <input
                 type="url"
-                value={form.avatarUrl}
+                value={form.avatarUrl ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, avatarUrl: e.target.value }))}
                 placeholder="https://example.com/avatar.png"
                 className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
@@ -109,7 +104,7 @@ function ProfilePage() {
               </label>
               <input
                 type="text"
-                value={form.location}
+                value={form.location ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
                 placeholder="City, Country"
                 className="w-full px-3 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
