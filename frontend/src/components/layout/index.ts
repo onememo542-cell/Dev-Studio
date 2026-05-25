@@ -5,7 +5,4 @@ export { CommandPalette } from "./command-palette";
 export * from "./page-container";
 export * from "./tab-nav";
 export * from "./split-layout";
-export { NotFoundComponent } from "./not-found";
-export { ErrorComponent } from "./error-component";
-export { ErrorBoundary } from "./error-boundary";
 export { PresenceIndicator } from "./presence-indicator";

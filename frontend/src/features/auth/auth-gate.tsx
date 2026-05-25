@@ -3,7 +3,7 @@ import { Outlet, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
-import { ErrorBoundary } from "@/components/layout/error-boundary";
+import { ErrorBoundary } from "@/components/errors";
 import { useForge } from "@/lib/store";
 
 const PUBLIC_ROUTES = ["/auth"];

@@ -28,7 +28,7 @@ import {
   CalendarCheck,
 } from "lucide-react";
 import { CommandPalette } from "./command-palette";
-import { ErrorBoundary } from "./error-boundary";
+import { ErrorBoundary } from "@/components/errors";
 import { PresenceIndicator } from "./presence-indicator";
 import { UserMenu } from "@/features/auth/user-menu";
 import { useAuth } from "@/hooks/use-auth";

@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext } from "@tanstack/react-router";
 
-import { NotFoundComponent, ErrorComponent } from "@/components/layout";
+import { NotFoundComponent, ErrorComponent } from "@/components/errors";
 import { AuthGate } from "@/features/auth/auth-gate";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
