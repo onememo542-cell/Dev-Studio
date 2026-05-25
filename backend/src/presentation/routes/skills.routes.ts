@@ -7,12 +7,16 @@ import {
   getProjects,
   upsertProject,
   deleteProject,
+  getSkillAreas,
 } from "../controllers/skills.controller.js";
 import { validateBody, validateQuery, validateParams } from "../middleware/validation.js";
 import { SkillTaskDto, SkillTaskToggleDto, SkillProjectDto, SkillAreaQueryDto } from "../dtos/skills.dto.js";
 import { IdParamDto } from "../dtos/common.dto.js";
 
 const router = Router();
+
+// Skill Area Definitions (public — no auth)
+router.get("/areas", getSkillAreas);
 
 // Tasks
 router.get("/tasks", validateQuery(SkillAreaQueryDto), getTasks);

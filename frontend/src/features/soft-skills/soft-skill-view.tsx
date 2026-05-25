@@ -8,8 +8,9 @@ import {
   Brain,
   Repeat2,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { SkillArea } from "@/features/tech-skills/skill-area";
-import { SOFT_SKILLS_DATA } from "@/data/soft";
+import { getSoftSkillArea } from "@/lib/api/skills";
 
 export const SOFT_SKILL_GROUPS: Record<string, { id: string; label: string; icon: any }[]> = {
   leadership: [
@@ -26,15 +27,31 @@ export const SOFT_SKILL_GROUPS: Record<string, { id: string; label: string; icon
   ],
 };
 
-const SOFT_SKILLS_DATA_FILTERED = {
-  ...SOFT_SKILLS_DATA,
-  subAreas: SOFT_SKILLS_DATA.subAreas?.filter((sa) => sa.id !== "top-10"),
-};
-
 export function SoftSkillView({ activeTab }: { activeTab?: string }) {
+  const { data: softArea, isLoading } = useQuery({
+    queryKey: ["skill-areas", "soft"],
+    queryFn: getSoftSkillArea,
+    staleTime: Infinity,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+        Loading…
+      </div>
+    );
+  }
+
+  if (!softArea) return null;
+
+  const softAreaFiltered = {
+    ...softArea,
+    subAreas: softArea.subAreas?.filter((sa) => sa.id !== "top-10"),
+  };
+
   return (
     <SkillArea
-      data={SOFT_SKILLS_DATA_FILTERED}
+      data={softAreaFiltered}
       activeSubArea={activeTab}
       subAreaGroups={SOFT_SKILL_GROUPS}
     />

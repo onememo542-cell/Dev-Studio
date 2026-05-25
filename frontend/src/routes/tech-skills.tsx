@@ -1,10 +1,11 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { SkillTabs } from "@/features/tech-skills/skill-tabs";
 import { SkillArea } from "@/features/tech-skills/skill-area";
 import { MockChatView } from "@/features/ai-mock/mock-chat-view";
 import { PageHeader, PageContainer, PageSection } from "@/components/layout";
-import { TECH_AREAS } from "@/data/tech";
+import { getTechSkillAreas } from "@/lib/api/skills";
 import type { TechAreaId } from "@/types/skills";
 import { Code2 } from "lucide-react";
 import { z } from "zod";
@@ -38,6 +39,14 @@ export const Route = createFileRoute("/tech-skills")({
 function TechSkillsPage() {
   const { tab } = useSearch({ from: "/tech-skills" });
 
+  const { data: techAreas, isLoading } = useQuery({
+    queryKey: ["skill-areas", "tech"],
+    queryFn: getTechSkillAreas,
+    staleTime: Infinity,
+  });
+
+  const currentArea = techAreas?.[tab as TechAreaId];
+
   return (
     <PageContainer>
       <PageSection>
@@ -58,9 +67,13 @@ function TechSkillsPage() {
           </Suspense>
         ) : tab === "ai-mock" ? (
           <MockChatView context="tech" />
-        ) : (
-          <SkillArea data={TECH_AREAS[tab as TechAreaId]} />
-        )}
+        ) : isLoading ? (
+          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+            Loading…
+          </div>
+        ) : currentArea ? (
+          <SkillArea data={currentArea} />
+        ) : null}
       </div>
     </PageContainer>
   );

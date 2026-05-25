@@ -1,4 +1,77 @@
 import { apiFetch } from "./base";
+import { resolveIcon } from "@/lib/icons";
+import type { SkillAreaData, SkillConcept, SkillResource, SkillChecklistItem, ServiceIntegration, TechAreaId, AreaId } from "@/types/skills";
+
+// ── Raw API shapes ─────────────────────────────────────────────────────────────
+
+interface RawSubArea {
+  id: string;
+  label: string;
+  iconName?: string;
+  color: string;
+  accent: string;
+  tags: string[];
+  concepts?: SkillConcept[];
+  resources?: SkillResource[];
+  checklist?: SkillChecklistItem[];
+  services?: ServiceIntegration[];
+}
+
+interface RawSkillArea {
+  id: string;
+  label: string;
+  iconName?: string;
+  description: string;
+  concepts: SkillConcept[];
+  resources: SkillResource[];
+  checklist: SkillChecklistItem[];
+  subAreasLabel?: string;
+  subAreas?: RawSubArea[];
+}
+
+interface SkillAreasResponse {
+  tech: Record<string, RawSkillArea>;
+  soft: RawSkillArea;
+}
+
+// ── Conversion helpers ─────────────────────────────────────────────────────────
+
+function convertArea(raw: RawSkillArea): SkillAreaData {
+  return {
+    ...raw,
+    id: raw.id as AreaId,
+    icon: resolveIcon(raw.iconName),
+    subAreas: raw.subAreas?.map((sa) => ({
+      ...sa,
+      icon: sa.iconName ? resolveIcon(sa.iconName) : undefined,
+    })),
+  };
+}
+
+// ── Skill Areas ────────────────────────────────────────────────────────────────
+
+let _skillAreasCache: SkillAreasResponse | null = null;
+
+async function fetchSkillAreas(): Promise<SkillAreasResponse> {
+  if (_skillAreasCache) return _skillAreasCache;
+  const data = await apiFetch<SkillAreasResponse>("/api/skills/areas");
+  _skillAreasCache = data;
+  return data;
+}
+
+export async function getTechSkillAreas(): Promise<Record<TechAreaId, SkillAreaData>> {
+  const data = await fetchSkillAreas();
+  const result: Record<string, SkillAreaData> = {};
+  for (const [key, raw] of Object.entries(data.tech)) {
+    result[key] = convertArea(raw);
+  }
+  return result as Record<TechAreaId, SkillAreaData>;
+}
+
+export async function getSoftSkillArea(): Promise<SkillAreaData> {
+  const data = await fetchSkillAreas();
+  return convertArea(data.soft);
+}
 
 export interface SkillTask {
   id: string;

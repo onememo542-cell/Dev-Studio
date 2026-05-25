@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { requireUser } from "../middleware/auth.js";
 import { skillsService } from "../../infrastructure/di/container.js";
+import { skillAreasData } from "../../infrastructure/static/skill-areas.js";
 
 // ── Tasks ──────────────────────────────────────────────────────────────────
 
@@ -89,4 +90,10 @@ export const deleteProject = async (req: Request, res: Response) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to delete project" });
   }
+};
+
+// ── Skill Area Definitions (static curriculum content) ─────────────────────
+
+export const getSkillAreas = (_req: Request, res: Response) => {
+  res.json(skillAreasData);
 };
